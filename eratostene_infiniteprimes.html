@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eratostene</title>
+<title>Eratosthenes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
@@ -33,7 +33,27 @@
   .wrap{
     max-width: min(1127px, calc(100% - 170px));
     margin: 0 auto;
-    padding: 6vh 1.5rem 6vh;
+    padding: calc(6vh + 32.7px) 1.5rem 6vh;
+    position: relative;
+  }
+  /* simboli decorativi di sfondo: statici (non si muovono, per non distrarre chi
+     gioca), posizione casuale a ogni apertura pagina */
+  .math-constellation{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .math-constellation text{
+    font-family:'Kalam', cursive;
+    font-size: 1.5rem;
+    fill: rgba(159, 176, 162, 0.20);
+  }
+  .wrap > .title-icon-row, .wrap > .instructions, .wrap > .rank-callout-spacer, .wrap > .level-layout{
+    position: relative;
+    z-index: 1;
   }
   h1{
     font-family:'Kalam', cursive;
@@ -41,13 +61,13 @@
     margin: 0 0 0.6rem;
   }
   h1 .accent{ color: var(--yellow); }
-  .title-spacer{ display: block; font-size: 0.6em; margin-top: 0.2rem; visibility: hidden; }
   .rank-callout-spacer{ margin: 0 0 0.9rem; }
   .instructions{
     color: var(--ink-dim);
     font-size: 1.14rem;
     line-height:1.5;
     margin: 0 0 2rem;
+    text-align: center;
     white-space: nowrap;
   }
 
@@ -77,16 +97,27 @@
     border-radius: 6px;
     font-family:'Space Mono', monospace;
     font-weight:700;
-    font-size: 1.265rem;
+    font-size: 1.898rem;
     color: var(--ink);
     cursor:pointer;
     user-select:none;
     -webkit-tap-highlight-color: transparent;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   }
-  .cell:hover{ background: #2A3D31; }
-  .cell.selected{ color: var(--circle-color, var(--yellow)); }
-  .cell svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+  .cell:hover{
+    background: rgba(232,196,104,0.22);
+    box-shadow: 0 0 16px 3px rgba(232,196,104,0.48);
+    border-color: rgba(232,196,104,0.75);
+  }
+  .cell.selected{
+    color: #1C1F16;
+    background: var(--circle-color, var(--yellow));
+    border-color: var(--circle-color, var(--yellow));
+    box-shadow:
+      0 0 8px 1px var(--circle-color, var(--yellow)),
+      0 0 20px 5px var(--circle-color, var(--yellow));
+  }
+  .cell svg{ display:none; }
   .cell circle{
     fill:none;
     stroke: var(--circle-color, var(--yellow));
@@ -163,6 +194,7 @@
 
   .feedback{ font-family:'Space Mono', monospace; font-size: 0.9rem; min-height: 1.4rem; margin: 0; }
   .feedback.ok{ color: #9DC48C; }
+  .side-panel-wrap{ display:flex; flex-direction:column; position: relative; }
   .feedback.bad{ color: var(--red); }
 
   .next-link{
@@ -190,13 +222,13 @@
     align-items:center;
     justify-content:space-between;
     gap: 1rem;
-    margin-bottom: 1.4rem;
+    margin-bottom: 0.9375rem;
   }
   .title-icon-row h1{ margin: 0; flex: 1; min-width: 0; text-align: center; }
   .mobile-icon-btn{
     flex-shrink: 0;
-    width: 84px;
-    height: 84px;
+    width: 55px;
+    height: 55px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -206,11 +238,16 @@
     color: var(--ink-dim);
     text-decoration: none;
     font-family:'Space Mono', monospace;
-    font-size: 2.24rem;
+    font-size: 23.47px;
     cursor: pointer;
-    transition: border-color 0.15s ease, color 0.15s ease;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, box-shadow 0.2s ease;
   }
-  .mobile-icon-btn:hover{ color: var(--yellow); border-color: var(--yellow); }
+  .mobile-icon-btn:hover{
+    color: var(--yellow);
+    border-color: rgba(232,196,104,0.75);
+    background: rgba(232,196,104,0.22);
+    box-shadow: 0 0 16px 3px rgba(232,196,104,0.48);
+  }
 
   /* --- spazio banner --- */
   .page-shell{
@@ -223,9 +260,10 @@
     margin: 0 auto;
     align-items:start;
     padding: 0 1rem;
+    position: relative;
   }
-  .ad-a{ position: sticky; top: calc(50vh - 300px); width: 160px; height: 600px; border: 1px dashed var(--rule); border-radius: 6px; background: var(--bg-panel); display:flex; align-items:center; justify-content:center; font-family:'Space Mono', monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color: var(--ink-dim); grid-area: adA; }
-  .ad-b-wrapper{ grid-area: adB; position: relative; align-self: stretch; }
+  .ad-a{ position: sticky; top: calc(50vh - 300px); width: 160px; height: 600px; border: 1px dashed var(--rule); border-radius: 6px; background: var(--bg-panel); display:flex; align-items:center; justify-content:center; font-family:'Space Mono', monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color: var(--ink-dim); grid-area: adA; z-index: 1; }
+  .ad-b-wrapper{ grid-area: adB; position: relative; align-self: stretch; z-index: 1; }
   .ad-top-rect{
     position: absolute;
     top: 3.5vh;
@@ -261,9 +299,14 @@
     text-transform:uppercase;
     color: var(--ink-dim);
   }
-  .content-col{ grid-area: content; min-width:0; }
+  .content-col{ grid-area: content; min-width:0; position: relative; z-index: 1; }
 
   @media (max-width: 900px){
+    html, body{
+      overflow: hidden;
+      height: 100%;
+      overscroll-behavior: none;
+    }
     .page-shell{
       min-height: 100vh;
       grid-template-columns: 1fr;
@@ -277,44 +320,29 @@
     .instructions{ display: none; }
   }
 
-  /* --- 2 slot dedicati e separati per mobile: mai gli stessi div del desktop, mai ridimensionati --- */
-  .ad-mobile-top, .ad-mobile-bottom{
-    display: none;
-    width: 320px;
-    height: 50px;
-    border: 1px dashed var(--rule);
-    border-radius: 6px;
-    background: var(--bg-panel);
-    align-items: center;
-    justify-content: center;
-    font-family:'Space Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-  }
-
   /* ============================================================
      SOLO MOBILE: da qui in giù, correzioni isolate,
      non toccano in alcun modo lo stile desktop sopra.
      ============================================================ */
   @media (max-width: 900px){
-    /* gli slot desktop si nascondono e basta: mai ridimensionati o riposizionati */
-    .ad-a, .ad-b-wrapper{ display: none; }
-    /* i 2 slot dedicati mobile prendono il loro posto, fissi, sempre 320x50 */
-    .ad-mobile-top{
-      display: flex;
+    /* i 2 banner (sopra e sotto) restano sempre visibili, fissi, "tagliano" la pagina */
+    .ad-a{
       position: fixed;
       top: 0; left: 0; right: 0;
+      bottom: auto;
       width: 320px;
+      height: 50px;
       margin: 0 auto;
       z-index: 9000;
     }
-    .ad-mobile-bottom{
-      display: flex;
+    .ad-b-wrapper{ display: contents; }
+    .ad-top-rect{ display: none; }
+    .ad-side-small{
       position: fixed;
+      top: auto;
       bottom: 0; left: 0; right: 0;
       width: 320px;
+      height: 50px;
       margin: 0 auto;
       z-index: 9000;
     }
@@ -342,10 +370,9 @@
       width: 100%;
     }
     .title-icon-row h1{
-      font-size: 0.85rem;
+      font-size: 0.7225rem;
       text-align: center;
     }
-    .title-spacer{ font-size: 0.85em; }
     .mobile-icon-btn{
       width: 44px;
       height: 44px;
@@ -368,7 +395,7 @@
       width: 100%;
       margin-bottom: 0.5rem;
     }
-    .cell{ font-size: 1rem; }
+    .cell{ font-size: 1.5rem; }
 
     .side-panel{
       display: grid;
@@ -381,7 +408,11 @@
     }
     .side-panel > div:first-child{ grid-column: 1; grid-row: 2; }
     .answer-row{ display: contents; }
-    .answer-row input[type="number"]{ grid-column: 1; grid-row: 1; }
+    .answer-row input[type="number"]{
+      grid-column: 1;
+      grid-row: 1;
+      width: 100%;
+    }
     .answer-row button.check{
       grid-column: 2;
       grid-row: 1 / 3;
@@ -409,7 +440,7 @@
       box-sizing: border-box;
     }
     .picked-chip{
-      font-size: 0.9rem;
+      font-size: 1.35rem;
       text-align: center;
       border: 1px solid var(--rule);
       border-radius: 4px;
@@ -513,9 +544,10 @@
   }
   .audio-slider-row label{
     font-family:'Work Sans', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.99rem;
     color: var(--ink-dim);
-    min-width: 5.5rem;
+    width: 6.05rem;
+    flex-shrink: 0;
   }
   .audio-slider-row input[type="range"]{
     flex: 1;
@@ -523,12 +555,23 @@
   }
   .audio-slider-row span{
     font-family:'Space Mono', monospace;
-    font-size: 0.85rem;
+    font-size: 0.935rem;
     color: var(--ink);
-    min-width: 2.8rem;
+    width: 3.08rem;
+    flex-shrink: 0;
     text-align: right;
   }
   .audio-toggle-btn{ cursor: pointer; }
+  .mobile-icon-btn svg{ width: 25.3px; height: 25.3px; }
+  #mobileSkipBtn svg{ width: 26.5px; height: 26.5px; } /* icona volume: +10% rispetto alla casetta */
+  /* stato "acceso" del volume (audio non muto): stessa illuminazione dei numeri
+     selezionati nella griglia, l'icona resta sempre la stessa, cambia solo questo */
+  .audio-toggle-btn.audio-on{
+    color: #1C1F16;
+    background: var(--yellow);
+    border-color: var(--yellow);
+    box-shadow: 0 0 8px 1px var(--yellow), 0 0 20px 5px var(--yellow);
+  }
   .modal-note{
     font-family:'Space Mono', monospace;
     font-size: 0.75rem;
@@ -539,24 +582,77 @@
 </head>
 <body>
 
-<div class="ad-mobile-top" id="adSlotMobileTop" aria-hidden="true">Ad 320×50</div>
-<div class="ad-mobile-bottom" id="adSlotMobileBottom" aria-hidden="true">Ad 320×50</div>
-
-
 <audio id="bgMusic" src="eratostene_thesieve.mp3" loop preload="none"></audio>
 
 <div class="rotate-lock-overlay">Please rotate your device back to portrait to continue.</div>
 
 
 <div class="page-shell">
-  <div class="ad-a" id="adSlotDesktopLeft" aria-hidden="true">Ad space</div>
+  <svg class="math-constellation" viewBox="0 0 1000 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <text x="848" y="288" text-anchor="middle">π</text>
+      <text x="363" y="232" text-anchor="middle">√</text>
+      <text x="276" y="227" text-anchor="middle">Σ</text>
+      <text x="872" y="147" text-anchor="middle">∞</text>
+      <text x="329" y="517" text-anchor="middle">∫</text>
+      <text x="601" y="656" text-anchor="middle">Δ</text>
+      <text x="706" y="542" text-anchor="middle">θ</text>
+      <text x="32" y="316" text-anchor="middle">×</text>
+      <text x="59" y="539" text-anchor="middle">÷</text>
+      <text x="206" y="841" text-anchor="middle">π</text>
+      <text x="862" y="225" text-anchor="middle">√</text>
+      <text x="549" y="427" text-anchor="middle">Σ</text>
+      <text x="217" y="369" text-anchor="middle">∞</text>
+      <text x="359" y="150" text-anchor="middle">∫</text>
+      <text x="119" y="594" text-anchor="middle">Δ</text>
+      <text x="576" y="510" text-anchor="middle">θ</text>
+      <text x="226" y="103" text-anchor="middle">×</text>
+      <text x="112" y="234" text-anchor="middle">÷</text>
+      <text x="743" y="603" text-anchor="middle">π</text>
+      <text x="952" y="478" text-anchor="middle">√</text>
+      <text x="639" y="751" text-anchor="middle">Σ</text>
+      <text x="581" y="108" text-anchor="middle">∞</text>
+      <text x="132" y="850" text-anchor="middle">∫</text>
+      <text x="754" y="787" text-anchor="middle">Δ</text>
+      <text x="247" y="790" text-anchor="middle">θ</text>
+      <text x="502" y="111" text-anchor="middle">×</text>
+      <text x="968" y="830" text-anchor="middle">÷</text>
+      <text x="833" y="580" text-anchor="middle">π</text>
+      <text x="139" y="308" text-anchor="middle">√</text>
+      <text x="485" y="672" text-anchor="middle">Σ</text>
+      <text x="154" y="389" text-anchor="middle">∞</text>
+      <text x="878" y="820" text-anchor="middle">∫</text>
+      <text x="443" y="799" text-anchor="middle">Δ</text>
+      <text x="573" y="283" text-anchor="middle">θ</text>
+      <text x="254" y="616" text-anchor="middle">×</text>
+      <text x="785" y="171" text-anchor="middle">÷</text>
+      <text x="816" y="853" text-anchor="middle">π</text>
+      <text x="423" y="43" text-anchor="middle">√</text>
+      <text x="65" y="83" text-anchor="middle">Σ</text>
+      <text x="70" y="793" text-anchor="middle">∞</text>
+      <text x="956" y="606" text-anchor="middle">∫</text>
+      <text x="87" y="696" text-anchor="middle">Δ</text>
+      <text x="512" y="738" text-anchor="middle">θ</text>
+      <text x="700" y="127" text-anchor="middle">×</text>
+      <text x="967" y="391" text-anchor="middle">÷</text>
+      <text x="455" y="619" text-anchor="middle">π</text>
+      <text x="843" y="522" text-anchor="middle">√</text>
+      <text x="956" y="57" text-anchor="middle">Σ</text>
+      <text x="747" y="38" text-anchor="middle">∞</text>
+      <text x="934" y="168" text-anchor="middle">∫</text>
+      <text x="443" y="419" text-anchor="middle">π</text>
+      <text x="234" y="643" text-anchor="middle">√</text>
+      <text x="213" y="265" text-anchor="middle">Σ</text>
+      <text x="284" y="166" text-anchor="middle">∞</text>
+      <text x="808" y="118" text-anchor="middle">∫</text>
+    </svg>
+  <div class="ad-a" aria-hidden="true">Ad space</div>
 
   <div class="content-col">
   <div class="wrap" id="wrap">
     <div class="title-icon-row">
-      <button type="button" class="mobile-icon-btn audio-toggle-btn" id="mobileSkipBtn" aria-label="Sound">🔊</button>
-      <h1>Eratostene <span class="accent">∞</span><span class="title-spacer">&nbsp;</span></h1>
-      <a class="mobile-icon-btn" id="homeBtn" href="index.html" aria-label="Home">🏠</a>
+      <button type="button" class="mobile-icon-btn audio-toggle-btn" id="mobileSkipBtn" aria-label="Sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8 8 0 0 1 0 12"/></svg></button>
+      <h1 id="levelTitle">Eratosthenes <span class="accent">·</span> ∞ Primes</h1>
+      <a class="mobile-icon-btn" id="homeBtn" href="index.html" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></a>
     </div>
     <p class="instructions">Tap every prime you can find. They'll drop into the box on the side to help you add them up. Then write the total.</p>
     <div class="rank-callout-spacer"></div>
@@ -567,12 +663,67 @@
   </div>
 
   <div class="ad-b-wrapper">
-    <div class="ad-top-rect" id="adSlotDesktopTopRect" aria-hidden="true">Ad 300×250</div>
-    <div class="ad-side-small" id="adSlotDesktopSideSmall" aria-hidden="true">Ad 160×300</div>
+    <div class="ad-top-rect" aria-hidden="true">Ad 300×250</div>
+    <div class="ad-side-small" aria-hidden="true">Ad 320×50</div>
   </div>
 </div>
 
 <script>
+  // schermata bloccata su mobile: non deve scorrere in nessuna direzione (tutto
+  // dovrebbe già stare nella schermata grazie al ridimensionamento). L'overflow:hidden
+  // via CSS non basta sempre (es. il "rimbalzo" di iOS Safari), quindi blocco anche
+  // il gesto stesso qui. Solo su mobile, non tocca in alcun modo il desktop
+  if (window.innerWidth <= 900){
+    document.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+  }
+
+  // simboli di sfondo: statici (nessun movimento), ma con posizione casuale a ogni
+  // apertura pagina — un "seed" diverso genera una nuova disposizione ogni volta.
+  // Chiamata solo DOPO che la griglia vera è stata riempita: misurarla prima
+  // darebbe l'altezza del solo segnaposto di caricamento, non quella reale
+  function randomizeConstellation(){
+    const svg = document.querySelector('.math-constellation');
+    if (!svg) return;
+    function mulberry32(seed){
+      return function(){
+        seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+        let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+    const seed = (Date.now() ^ (Math.random() * 0xFFFFFFFF)) | 0;
+    const rand = mulberry32(seed);
+
+    // viewBox calcolato dalla dimensione vera del contenitore (non più un 1000×900
+    // fisso): con quel valore fisso, su un contenitore più alto che largo come
+    // questa pagina, "xMidYMid slice" ritagliava una fetta orizzontale strettissima
+    // del viewBox, lasciando i simboli confinati in una banda verticale sottile
+    const wrapEl = svg.closest('.page-shell') || svg.parentElement;
+    const vbWidth = wrapEl.clientWidth || window.innerWidth;
+    const vbHeight = wrapEl.clientHeight || window.innerHeight;
+    svg.setAttribute('viewBox', `0 0 ${vbWidth} ${vbHeight}`);
+    const marginX = Math.min(30, vbWidth * 0.03);
+    const marginY = Math.min(30, vbHeight * 0.03);
+
+    // qui i simboli sono FERMI (a differenza dell'index, dove si muovono): due nati
+    // vicini resterebbero ammucchiati per sempre, quindi ognuno viene ripescato
+    // finché non trova un punto abbastanza lontano da tutti quelli già piazzati
+    const minDist = 70;
+    const placed = [];
+    svg.querySelectorAll('text').forEach(el => {
+      let x, y, tries = 0;
+      do {
+        x = marginX + rand() * (vbWidth - marginX * 2);
+        y = marginY + rand() * (vbHeight - marginY * 2);
+        tries++;
+      } while (tries < 40 && placed.some(p => Math.hypot(p.x - x, p.y - y) < minDist));
+      placed.push({ x, y });
+      el.setAttribute('x', x.toFixed(0));
+      el.setAttribute('y', y.toFixed(0));
+    });
+  }
+
   const params = new URLSearchParams(window.location.search);
   const levelNum = parseInt(params.get('n')) || 1;
   const STORAGE_KEY = 'erato_infinite_last';
@@ -815,15 +966,17 @@
 
     document.getElementById('levelLayout').innerHTML = `
       <div class="grid" id="gridEl"></div>
-      <div class="side-panel">
-        <div>
-          <div class="picked-row" id="pickedRow"></div>
+      <div class="side-panel-wrap">
+        <div class="side-panel">
+          <div>
+            <div class="picked-row" id="pickedRow"></div>
+          </div>
+          <div class="answer-row">
+            <input type="number" id="answerInput" placeholder="Sum of the primes" inputmode="numeric">
+            <button class="check" id="checkBtn"><span class="check-label">${checkLabelHtml}</span></button>
+          </div>
+          <p class="feedback" id="feedback"></p>
         </div>
-        <div class="answer-row">
-          <input type="number" id="answerInput" placeholder="Sum of the primes" inputmode="numeric">
-          <button class="check" id="checkBtn"><span class="check-label">${checkLabelHtml}</span></button>
-        </div>
-        <p class="feedback" id="feedback"></p>
       </div>
     `;
 
@@ -854,6 +1007,7 @@
       cell.addEventListener('click', () => toggleCell(i));
       gridEl.appendChild(cell);
     });
+    randomizeConstellation(); // solo ORA la griglia ha la sua altezza vera
 
     function toggleCell(i){
       if (selected.has(i)){
@@ -895,6 +1049,51 @@
     }
     render();
     window.addEventListener('resize', render);
+
+    // dimensiona i pulsanti tondi (volume, home) come il pulsante suono dell'index (55px
+    // fisso). Qui il titolo è statico (non cambia per livello come nelle altre due
+    // pagine), quindi basta chiamarla una volta al caricamento
+    function sizeTitleIconButtons(){
+      const h1 = document.getElementById('levelTitle');
+      const btns = document.querySelectorAll('.title-icon-row .mobile-icon-btn');
+      if (window.innerWidth <= 900){
+        if (h1) h1.style.fontSize = '';
+        btns.forEach(btn => { btn.style.width = ''; btn.style.height = ''; btn.style.fontSize = ''; });
+        return;
+      }
+      if (!h1 || !btns.length) return;
+
+      const diameter = 55;
+      btns.forEach(btn => {
+        btn.style.width = diameter + 'px';
+        btn.style.height = diameter + 'px';
+        btn.style.fontSize = (diameter * 0.4267) + 'px';
+      });
+
+      h1.style.fontSize = '';
+      const availableWidth = h1.getBoundingClientRect().width;
+      const baseFontSize = parseFloat(getComputedStyle(h1).fontSize);
+
+      const titleProbe = document.createElement('span');
+      const h1Style = getComputedStyle(h1);
+      titleProbe.style.fontFamily = h1Style.fontFamily;
+      titleProbe.style.fontWeight = h1Style.fontWeight;
+      titleProbe.style.fontSize = h1Style.fontSize;
+      titleProbe.style.whiteSpace = 'nowrap';
+      titleProbe.style.position = 'absolute';
+      titleProbe.style.visibility = 'hidden';
+      titleProbe.textContent = h1.textContent;
+      document.body.appendChild(titleProbe);
+      const neededWidth = titleProbe.getBoundingClientRect().width;
+      document.body.removeChild(titleProbe);
+
+      if (neededWidth > availableWidth && availableWidth > 0){
+        const scale = (availableWidth / neededWidth) * 0.97;
+        h1.style.fontSize = (baseFontSize * scale) + 'px';
+      }
+    }
+    sizeTitleIconButtons();
+    window.addEventListener('resize', sizeTitleIconButtons);
 
     // solo ORA il pannello destro ha davvero tutti e 5 i riquadri dentro: l'altezza misurata è quella reale
     alignSidePanel();
@@ -942,48 +1141,6 @@
 </script>
 
 <script src="mathemory-audio.js"></script>
-
-<script>
-  // --- pubblicità: ogni annuncio isolato nel proprio iframe, con il proprio atOptions privato.
-  // Il formato Adsterra "highperformanceformat" usa una variabile globale condivisa (atOptions):
-  // con più annunci sulla stessa pagina si sovrascrivono a vicenda se non isolati così.
-  // Il codice del dispositivo "sbagliato" non viene MAI creato nella pagina — evita impression
-  // non valide che romperebbero il rapporto con Adsterra.
-  (function(){
-    const isMobileDevice = window.innerWidth <= 900;
-    const AD_SLOTS_DESKTOP = [
-      { elementId: 'adSlotDesktopLeft',      key: 'a6525e43bef9221ab88fe82913548d2e', width: 160, height: 600 },
-      { elementId: 'adSlotDesktopTopRect',   key: '50f98522da8b5e97edc7f610cc39417c', width: 300, height: 250 },
-      { elementId: 'adSlotDesktopSideSmall', key: 'e9e96fb4584ea554b462b7eccbf26cba', width: 160, height: 300 },
-    ];
-    const AD_SLOTS_MOBILE = [
-      { elementId: 'adSlotMobileTop',    key: 'a2a9c900934d95ac8d859267d025b589', width: 320, height: 50 },
-      { elementId: 'adSlotMobileBottom', key: 'fd6daf0ccf42f29bcea4f242a1daa43f', width: 320, height: 50 },
-    ];
-
-    function injectAdIframe(elementId, key, width, height){
-      if (!key) return; // nessun codice ancora inserito per questo slot: resta il placeholder
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      el.innerHTML = '';
-      const iframe = document.createElement('iframe');
-      iframe.style.width = width + 'px';
-      iframe.style.height = height + 'px';
-      iframe.style.border = 'none';
-      iframe.style.display = 'block';
-      iframe.scrolling = 'no';
-      iframe.srcdoc =
-        '<!DOCTYPE html><html><head><style>body{margin:0;padding:0;overflow:hidden;}</style></head><body>' +
-        '<script>atOptions={"key":"' + key + '","format":"iframe","height":' + height + ',"width":' + width + ',"params":{}};<\/script>' +
-        '<script src="https://www.highperformanceformat.com/' + key + '/invoke.js"><\/script>' +
-        '</body></html>';
-      el.appendChild(iframe);
-    }
-
-    const slots = isMobileDevice ? AD_SLOTS_MOBILE : AD_SLOTS_DESKTOP;
-    slots.forEach(slot => injectAdIframe(slot.elementId, slot.key, slot.width, slot.height));
-  })();
-</script>
 
 </body>
 </html>

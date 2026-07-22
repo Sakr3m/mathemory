@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eratostene</title>
+<title>Eratosthenes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
@@ -33,7 +33,28 @@
   .wrap{
     max-width: min(1127px, calc(100% - 170px));
     margin: 0 auto;
-    padding: 6vh 1.5rem 6vh;
+    padding: calc(6vh + 32.7px) 1.5rem 6vh;
+    position: relative;
+  }
+  /* simboli decorativi di sfondo: statici (non si muovono, per non distrarre chi
+     gioca), posizione casuale a ogni apertura pagina — che qui coincide sempre con
+     ogni cambio livello, visto che la navigazione tra livelli ricarica la pagina intera */
+  .math-constellation{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .math-constellation text{
+    font-family:'Kalam', cursive;
+    font-size: 1.5rem;
+    fill: rgba(159, 176, 162, 0.20);
+  }
+  .wrap > .title-icon-row, .wrap > .instructions, .wrap > .rank-callout, .wrap > .level-layout{
+    position: relative;
+    z-index: 1;
   }
   h1{
     font-family:'Kalam', cursive;
@@ -41,31 +62,46 @@
     margin: 0 0 0.6rem;
   }
   h1 .accent{ color: var(--yellow); }
-  h1 .max-prime-note{ display: block; font-size: 0.6em; margin-top: 0.2rem; }
-  .rank-callout{ margin: 0 0 0.9rem; display:flex; align-items:baseline; gap: 0.7rem; flex-wrap: nowrap; }
+  .rank-callout{
+    position: relative;
+    height: 26.78px; /* stessa altezza di prima, per non spostare griglia/pannello sotto */
+    margin: 0 0 0.9rem;
+  }
   .rank-badge{
-    display:inline-block;
-    flex-shrink: 0;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 409px; height: 40px; /* raddoppiata in larghezza, ×1.5 in altezza rispetto a prima */
     font-family:'Space Mono', monospace;
     font-size: 0.935rem;
     font-weight:700;
     color: var(--bg);
     background: var(--circle-color, var(--yellow));
-    padding: 0.275rem 0.77rem;
     border-radius: 4px;
+    box-sizing: border-box;
   }
   .rank-phrase{
-    flex: 1 1 auto;
-    min-width: 0;
+    position: absolute;
+    width: 409px; /* poco sotto il badge, stessa larghezza */
+    text-align: center;
     font-family:'Space Mono', monospace;
-    font-size: 0.935rem;
-    color: var(--ink-dim);
+    font-size: 0.75rem;
+    color: rgba(243,239,228,0.5);
+  }
+  /* quando non c'è ancora un rango sbloccato, badge e descrizione restano nel DOM
+     (con un testo placeholder) solo per riservare lo spazio: così gli elementi sotto
+     non "salgono" quando il rango non c'è, invece di restare al loro posto giusto */
+  .rank-callout.no-rank .rank-badge,
+  .rank-callout.no-rank .rank-phrase{
+    visibility: hidden;
   }
   .instructions{
     color: var(--ink-dim);
     font-size: 1.14rem;
     line-height:1.5;
-    margin: 0 0 2rem;
+    margin: 0 0 28.847px;
+    text-align: center;
     white-space: nowrap;
   }
 
@@ -77,6 +113,27 @@
   }
   @media (max-width: 1400px){
     .level-layout{ grid-template-columns: 1fr; }
+    .rank-callout{
+      position: static;
+      height: auto;
+      display:flex; align-items:baseline; gap: 0.7rem; flex-wrap: nowrap;
+    }
+    .rank-badge{
+      position: static;
+      display:inline-block;
+      width: auto; height: auto;
+      flex-shrink: 0;
+      padding: 0.275rem 0.77rem;
+    }
+    .rank-phrase{
+      position: static;
+      width: auto;
+      flex: 1 1 auto;
+      min-width: 0;
+      text-align: left;
+      font-size: 0.935rem;
+      color: var(--ink-dim);
+    }
   }
 
   .grid{
@@ -95,16 +152,27 @@
     border-radius: 6px;
     font-family:'Space Mono', monospace;
     font-weight:700;
-    font-size: 1.265rem;
+    font-size: 1.898rem;
     color: var(--ink);
     cursor:pointer;
     user-select:none;
     -webkit-tap-highlight-color: transparent;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   }
-  .cell:hover{ background: #2A3D31; }
-  .cell.selected{ color: var(--circle-color, var(--yellow)); }
-  .cell svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+  .cell:hover{
+    background: rgba(232,196,104,0.22);
+    box-shadow: 0 0 16px 3px rgba(232,196,104,0.48);
+    border-color: rgba(232,196,104,0.75);
+  }
+  .cell.selected{
+    color: #1C1F16;
+    background: var(--circle-color, var(--yellow));
+    border-color: var(--circle-color, var(--yellow));
+    box-shadow:
+      0 0 8px 1px var(--circle-color, var(--yellow)),
+      0 0 20px 5px var(--circle-color, var(--yellow));
+  }
+  .cell svg{ display:none; }
   .cell circle{
     fill:none;
     stroke: var(--circle-color, var(--yellow));
@@ -132,7 +200,7 @@
     color: var(--yellow);
     background: rgba(232,196,104,0.12);
     border-radius: 6px;
-    font-size: 1.0925rem;
+    font-size: 2.185rem;
   }
   .picked-chip.empty-slot{
     background: transparent;
@@ -180,6 +248,7 @@
   button.check.error:hover{ background: var(--red); }
 
   .feedback{ font-family:'Space Mono', monospace; font-size: 0.9rem; min-height: 1.4rem; margin: 0; }
+  .side-panel-wrap{ display:flex; flex-direction:column; position: relative; }
   .feedback.ok{ color: #9DC48C; }
   .feedback.bad{ color: var(--red); }
 
@@ -208,13 +277,13 @@
     align-items:center;
     justify-content:space-between;
     gap: 1rem;
-    margin-bottom: 1.4rem;
+    margin-bottom: 0.9375rem;
   }
   .title-icon-row h1{ margin: 0; flex: 1; min-width: 0; text-align: center; }
   .mobile-icon-btn{
     flex-shrink: 0;
-    width: 84px;
-    height: 84px;
+    width: 55px;
+    height: 55px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -224,11 +293,16 @@
     color: var(--ink-dim);
     text-decoration: none;
     font-family:'Space Mono', monospace;
-    font-size: 2.24rem;
+    font-size: 23.47px;
     cursor: pointer;
-    transition: border-color 0.15s ease, color 0.15s ease;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, box-shadow 0.2s ease;
   }
-  .mobile-icon-btn:hover{ color: var(--yellow); border-color: var(--yellow); }
+  .mobile-icon-btn:hover{
+    color: var(--yellow);
+    border-color: rgba(232,196,104,0.75);
+    background: rgba(232,196,104,0.22);
+    box-shadow: 0 0 16px 3px rgba(232,196,104,0.48);
+  }
 
   /* --- spazio banner --- */
   .page-shell{
@@ -241,9 +315,10 @@
     margin: 0 auto;
     align-items:start;
     padding: 0 1rem;
+    position: relative;
   }
-  .ad-a{ position: sticky; top: calc(50vh - 300px); width: 160px; height: 600px; border: 1px dashed var(--rule); border-radius: 6px; background: var(--bg-panel); display:flex; align-items:center; justify-content:center; font-family:'Space Mono', monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color: var(--ink-dim); grid-area: adA; }
-  .ad-b-wrapper{ grid-area: adB; position: relative; align-self: stretch; }
+  .ad-a{ position: sticky; top: calc(50vh - 300px); width: 160px; height: 600px; border: 1px dashed var(--rule); border-radius: 6px; background: var(--bg-panel); display:flex; align-items:center; justify-content:center; font-family:'Space Mono', monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color: var(--ink-dim); grid-area: adA; z-index: 1; }
+  .ad-b-wrapper{ grid-area: adB; position: relative; align-self: stretch; z-index: 1; }
   .ad-top-rect{
     position: absolute;
     top: 3.5vh;
@@ -279,9 +354,14 @@
     text-transform:uppercase;
     color: var(--ink-dim);
   }
-  .content-col{ grid-area: content; min-width:0; }
+  .content-col{ grid-area: content; min-width:0; position: relative; z-index: 1; }
 
   @media (max-width: 900px){
+    html, body{
+      overflow: hidden;
+      height: 100%;
+      overscroll-behavior: none;
+    }
     .page-shell{
       min-height: 100vh;
       grid-template-columns: 1fr;
@@ -295,44 +375,29 @@
     .instructions{ display: none; }
   }
 
-  /* --- 2 slot dedicati e separati per mobile: mai gli stessi div del desktop, mai ridimensionati --- */
-  .ad-mobile-top, .ad-mobile-bottom{
-    display: none;
-    width: 320px;
-    height: 50px;
-    border: 1px dashed var(--rule);
-    border-radius: 6px;
-    background: var(--bg-panel);
-    align-items: center;
-    justify-content: center;
-    font-family:'Space Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-  }
-
   /* ============================================================
      SOLO MOBILE: da qui in giù, correzioni isolate,
      non toccano in alcun modo lo stile desktop sopra.
      ============================================================ */
   @media (max-width: 900px){
-    /* gli slot desktop si nascondono e basta: mai ridimensionati o riposizionati */
-    .ad-a, .ad-b-wrapper{ display: none; }
-    /* i 2 slot dedicati mobile prendono il loro posto, fissi, sempre 320x50 */
-    .ad-mobile-top{
-      display: flex;
+    /* i 2 banner (sopra e sotto) restano sempre visibili, fissi, "tagliano" la pagina */
+    .ad-a{
       position: fixed;
       top: 0; left: 0; right: 0;
+      bottom: auto;
       width: 320px;
+      height: 50px;
       margin: 0 auto;
       z-index: 9000;
     }
-    .ad-mobile-bottom{
-      display: flex;
+    .ad-b-wrapper{ display: contents; }
+    .ad-top-rect{ display: none; }
+    .ad-side-small{
       position: fixed;
+      top: auto;
       bottom: 0; left: 0; right: 0;
       width: 320px;
+      height: 50px;
       margin: 0 auto;
       z-index: 9000;
     }
@@ -356,14 +421,13 @@
     /* titolo: due righe centrate, pulsanti icona ai lati (dimensioni ridotte per mobile) */
     .title-icon-row{
       gap: 0.5rem;
-      margin-bottom: 1.2rem;
+      margin-bottom: -0.46rem;
       width: 100%;
     }
     .title-icon-row h1{
-      font-size: 0.85rem;
+      font-size: 0.7225rem;
       text-align: center;
     }
-    .title-icon-row h1 .max-prime-note{ display: block; font-size: 0.85em; margin-top: 0.2rem; }
     .mobile-icon-btn{
       width: 44px;
       height: 44px;
@@ -372,9 +436,16 @@
     .mobile-icon-btn:active{ background: var(--rule); }
 
     .instructions{ display: none; } /* niente spazio per il paragrafo lungo qui, il titolo basta */
-    .rank-callout{ flex-wrap: nowrap; width: 100%; min-height: 0.85rem; margin-bottom: 0.59rem; }
+    .rank-callout{
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      min-height: 0;
+      gap: 0.28rem;
+      margin-bottom: 0.59rem;
+    }
     .rank-badge{ font-size: 0.528rem; padding: 0.18rem 0.54rem; flex-shrink: 0; }
-    .rank-phrase{ font-size: 0.48rem; flex: 1 1 auto; min-width: 0; }
+    .rank-phrase{ font-size: 0.48rem; width: 100%; text-align: center; }
 
     /* niente più colonne fisse: un blocco solo, la griglia occupa tutta la larghezza del contenitore */
     .level-layout{
@@ -388,7 +459,7 @@
       width: 100%;
       margin-bottom: 0.5rem;
     }
-    .cell{ font-size: 1rem; }
+    .cell{ font-size: 1.5rem; }
 
     .side-panel{
       display: grid;
@@ -401,7 +472,11 @@
     }
     .side-panel > div:first-child{ grid-column: 1; grid-row: 2; }
     .answer-row{ display: contents; }
-    .answer-row input[type="number"]{ grid-column: 1; grid-row: 1; }
+    .answer-row input[type="number"]{
+      grid-column: 1;
+      grid-row: 1;
+      width: 100%;
+    }
     .answer-row button.check{
       grid-column: 2;
       grid-row: 1 / 3;
@@ -429,7 +504,7 @@
       box-sizing: border-box;
     }
     .picked-chip{
-      font-size: 0.9rem;
+      font-size: 1.35rem;
       text-align: center;
       border: 1px solid var(--rule);
       border-radius: 4px;
@@ -533,9 +608,10 @@
   }
   .audio-slider-row label{
     font-family:'Work Sans', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.99rem;
     color: var(--ink-dim);
-    min-width: 5.5rem;
+    width: 6.05rem;
+    flex-shrink: 0;
   }
   .audio-slider-row input[type="range"]{
     flex: 1;
@@ -543,25 +619,38 @@
   }
   .audio-slider-row span{
     font-family:'Space Mono', monospace;
-    font-size: 0.85rem;
+    font-size: 0.935rem;
     color: var(--ink);
-    min-width: 2.8rem;
+    width: 3.08rem;
+    flex-shrink: 0;
     text-align: right;
   }
   .audio-toggle-btn{ cursor: pointer; }
+  .mobile-icon-btn svg{ width: 25.3px; height: 25.3px; }
+  #mobileSkipBtn svg{ width: 26.5px; height: 26.5px; } /* icona volume: +10% rispetto alla casetta */
+  /* stato "acceso" del volume (audio non muto): stessa illuminazione dei numeri
+     selezionati nella griglia, l'icona resta sempre la stessa, cambia solo questo */
+  .audio-toggle-btn.audio-on{
+    color: #1C1F16;
+    background: var(--yellow);
+    border-color: var(--yellow);
+    box-shadow: 0 0 8px 1px var(--yellow), 0 0 20px 5px var(--yellow);
+  }
   .modal-note{
     font-family:'Space Mono', monospace;
     font-size: 0.75rem;
     color: var(--ink-faint);
     margin-top: 0.8rem;
   }
+  .nickname-hint{
+    font-family:'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    margin: 0.4rem 0 0;
+  }
 </style>
 </head>
 <body>
-
-<div class="ad-mobile-top" id="adSlotMobileTop" aria-hidden="true">Ad 320×50</div>
-<div class="ad-mobile-bottom" id="adSlotMobileBottom" aria-hidden="true">Ad 320×50</div>
-
 
 <audio id="bgMusic" src="eratostene_primerush.mp3" loop preload="none"></audio>
 
@@ -572,7 +661,8 @@
     <h3>🎉 You finished the race!</h3>
     <p>Your total race time: <strong id="finishTotalTime"></strong></p>
     <p>Enter a nickname to be remembered for this race. It will be sent for the leaderboard.</p>
-    <input type="text" id="finishNickname" maxlength="24" placeholder="Your nickname">
+    <input type="text" id="finishNickname" maxlength="12" placeholder="Your nickname">
+    <p class="nickname-hint">3 to 12 characters. Letters, numbers, spaces, - _ . only (any language/alphabet is fine).</p>
     <div class="modal-buttons">
       <button type="button" class="modal-btn yes" id="finishConfirmBtn">Confirm</button>
       <button type="button" class="modal-btn no" id="finishSkipBtn">Skip</button>
@@ -583,14 +673,71 @@
 
 
 <div class="page-shell">
-  <div class="ad-a" id="adSlotDesktopLeft" aria-hidden="true">Ad space</div>
+  <svg class="math-constellation" viewBox="0 0 1000 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <text x="848" y="288" text-anchor="middle">π</text>
+      <text x="363" y="232" text-anchor="middle">√</text>
+      <text x="276" y="227" text-anchor="middle">Σ</text>
+      <text x="872" y="147" text-anchor="middle">∞</text>
+      <text x="329" y="517" text-anchor="middle">∫</text>
+      <text x="601" y="656" text-anchor="middle">Δ</text>
+      <text x="706" y="542" text-anchor="middle">θ</text>
+      <text x="32" y="316" text-anchor="middle">×</text>
+      <text x="59" y="539" text-anchor="middle">÷</text>
+      <text x="206" y="841" text-anchor="middle">π</text>
+      <text x="862" y="225" text-anchor="middle">√</text>
+      <text x="549" y="427" text-anchor="middle">Σ</text>
+      <text x="217" y="369" text-anchor="middle">∞</text>
+      <text x="359" y="150" text-anchor="middle">∫</text>
+      <text x="119" y="594" text-anchor="middle">Δ</text>
+      <text x="576" y="510" text-anchor="middle">θ</text>
+      <text x="226" y="103" text-anchor="middle">×</text>
+      <text x="112" y="234" text-anchor="middle">÷</text>
+      <text x="743" y="603" text-anchor="middle">π</text>
+      <text x="952" y="478" text-anchor="middle">√</text>
+      <text x="639" y="751" text-anchor="middle">Σ</text>
+      <text x="581" y="108" text-anchor="middle">∞</text>
+      <text x="132" y="850" text-anchor="middle">∫</text>
+      <text x="754" y="787" text-anchor="middle">Δ</text>
+      <text x="247" y="790" text-anchor="middle">θ</text>
+      <text x="502" y="111" text-anchor="middle">×</text>
+      <text x="968" y="830" text-anchor="middle">÷</text>
+      <text x="833" y="580" text-anchor="middle">π</text>
+      <text x="139" y="308" text-anchor="middle">√</text>
+      <text x="485" y="672" text-anchor="middle">Σ</text>
+      <text x="154" y="389" text-anchor="middle">∞</text>
+      <text x="878" y="820" text-anchor="middle">∫</text>
+      <text x="443" y="799" text-anchor="middle">Δ</text>
+      <text x="573" y="283" text-anchor="middle">θ</text>
+      <text x="254" y="616" text-anchor="middle">×</text>
+      <text x="785" y="171" text-anchor="middle">÷</text>
+      <text x="816" y="853" text-anchor="middle">π</text>
+      <text x="423" y="43" text-anchor="middle">√</text>
+      <text x="65" y="83" text-anchor="middle">Σ</text>
+      <text x="70" y="793" text-anchor="middle">∞</text>
+      <text x="956" y="606" text-anchor="middle">∫</text>
+      <text x="87" y="696" text-anchor="middle">Δ</text>
+      <text x="512" y="738" text-anchor="middle">θ</text>
+      <text x="700" y="127" text-anchor="middle">×</text>
+      <text x="967" y="391" text-anchor="middle">÷</text>
+      <text x="455" y="619" text-anchor="middle">π</text>
+      <text x="843" y="522" text-anchor="middle">√</text>
+      <text x="956" y="57" text-anchor="middle">Σ</text>
+      <text x="747" y="38" text-anchor="middle">∞</text>
+      <text x="934" y="168" text-anchor="middle">∫</text>
+      <text x="443" y="419" text-anchor="middle">π</text>
+      <text x="234" y="643" text-anchor="middle">√</text>
+      <text x="213" y="265" text-anchor="middle">Σ</text>
+      <text x="284" y="166" text-anchor="middle">∞</text>
+      <text x="808" y="118" text-anchor="middle">∫</text>
+    </svg>
+  <div class="ad-a" aria-hidden="true">Ad space</div>
 
   <div class="content-col">
   <div class="wrap" id="wrap">
     <div class="title-icon-row">
-      <button type="button" class="mobile-icon-btn audio-toggle-btn" id="mobileSkipBtn" aria-label="Sound">🔊</button>
+      <button type="button" class="mobile-icon-btn audio-toggle-btn" id="mobileSkipBtn" aria-label="Sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8 8 0 0 1 0 12"/></svg></button>
       <h1 id="levelTitle"></h1>
-      <a class="mobile-icon-btn" id="homeBtn" href="index.html" aria-label="Home">🏠</a>
+      <a class="mobile-icon-btn" id="homeBtn" href="index.html" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></a>
     </div>
     <p class="instructions">Tap every prime you can find. They'll drop into the box on the side to help you add them up. Then write the total.</p>
     <div class="rank-callout" id="rankCallout"></div>
@@ -601,12 +748,68 @@
   </div>
 
   <div class="ad-b-wrapper">
-    <div class="ad-top-rect" id="adSlotDesktopTopRect" aria-hidden="true">Ad 300×250</div>
-    <div class="ad-side-small" id="adSlotDesktopSideSmall" aria-hidden="true">Ad 160×300</div>
+    <div class="ad-top-rect" aria-hidden="true">Ad 300×250</div>
+    <div class="ad-side-small" aria-hidden="true">Ad 320×50</div>
   </div>
 </div>
 
 <script>
+  // schermata bloccata su mobile: non deve scorrere in nessuna direzione (tutto
+  // dovrebbe già stare nella schermata grazie al ridimensionamento). L'overflow:hidden
+  // via CSS non basta sempre (es. il "rimbalzo" di iOS Safari), quindi blocco anche
+  // il gesto stesso qui. Solo su mobile, non tocca in alcun modo il desktop
+  if (window.innerWidth <= 900){
+    document.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+  }
+
+  // simboli di sfondo: statici (nessun movimento), ma con posizione casuale a ogni
+  // apertura pagina — un "seed" diverso genera una nuova disposizione ogni volta,
+  // incluso ogni cambio livello (che qui ricarica sempre la pagina intera). Chiamata
+  // solo DOPO che la griglia vera è stata riempita (vedi renderLevel): misurarla
+  // prima darebbe l'altezza del solo segnaposto "Loading level…", non quella reale
+  function randomizeConstellation(){
+    const svg = document.querySelector('.math-constellation');
+    if (!svg) return;
+    function mulberry32(seed){
+      return function(){
+        seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+        let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+    const seed = (Date.now() ^ (Math.random() * 0xFFFFFFFF)) | 0;
+    const rand = mulberry32(seed);
+
+    // viewBox calcolato dalla dimensione vera del contenitore (non più un 1000×900
+    // fisso): con quel valore fisso, su un contenitore più alto che largo come
+    // questa pagina, "xMidYMid slice" ritagliava una fetta orizzontale strettissima
+    // del viewBox, lasciando i simboli confinati in una banda verticale sottile
+    const wrapEl = svg.closest('.page-shell') || svg.parentElement;
+    const vbWidth = wrapEl.clientWidth || window.innerWidth;
+    const vbHeight = wrapEl.clientHeight || window.innerHeight;
+    svg.setAttribute('viewBox', `0 0 ${vbWidth} ${vbHeight}`);
+    const marginX = Math.min(30, vbWidth * 0.03);
+    const marginY = Math.min(30, vbHeight * 0.03);
+
+    // qui i simboli sono FERMI (a differenza dell'index, dove si muovono): due nati
+    // vicini resterebbero ammucchiati per sempre, quindi ognuno viene ripescato
+    // finché non trova un punto abbastanza lontano da tutti quelli già piazzati
+    const minDist = 70;
+    const placed = [];
+    svg.querySelectorAll('text').forEach(el => {
+      let x, y, tries = 0;
+      do {
+        x = marginX + rand() * (vbWidth - marginX * 2);
+        y = marginY + rand() * (vbHeight - marginY * 2);
+        tries++;
+      } while (tries < 40 && placed.some(p => Math.hypot(p.x - x, p.y - y) < minDist));
+      placed.push({ x, y });
+      el.setAttribute('x', x.toFixed(0));
+      el.setAttribute('y', y.toFixed(0));
+    });
+  }
+
   const params = new URLSearchParams(window.location.search);
   const levelNum = parseInt(params.get('n')) || 1;
   const LAST_TIME_KEY = 'erato_primerush_last_time';
@@ -626,7 +829,6 @@
   localStorage.removeItem(HEARTBEAT_KEY);
   const ACC_CORRECT_KEY = 'erato_primerush_acc_correct';
   const ACC_TOTAL_KEY = 'erato_primerush_acc_total';
-  const RACE_END_DATE = new Date('2026-07-31T23:59:00+02:00');
   const wrap = document.getElementById('wrap');
 
   // --- 3 effetti sonori: cerchio (selezione), giusto, sbagliato ---
@@ -729,8 +931,12 @@
     `;
   }
 
-  fetch('eratostene_primerush.json')
+  const levelFetchController = new AbortController();
+  const levelFetchTimeout = setTimeout(() => levelFetchController.abort(), 7000);
+
+  fetch('eratostene_primerush.json', { signal: levelFetchController.signal })
     .then(res => {
+      clearTimeout(levelFetchTimeout);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     })
@@ -751,6 +957,10 @@
       renderLevel(levelData);
     })
     .catch(err => {
+      if (err.name === 'AbortError'){
+        showError('This is taking too long. Please check your connection and reload the page.');
+        return;
+      }
       showError(`
         Could not load <code>eratostene_primerush.json</code>.<br><br>
         If you're testing this by double-clicking the file (a <code>file://</code> address), most browsers block this kind of request for security reasons.<br><br>
@@ -760,9 +970,84 @@
       `);
     });
 
+  // stessa dimensione fissa del pulsante suono dell'index: 55px, indipendente
+  // dalla larghezza dello schermo e dal titolo di questa pagina
+  // dimensiona i pulsanti tondi (volume, home) come il pulsante suono dell'index (55px
+  // fisso), poi verifica che il titolo di questa pagina (più lungo ora, con "The
+  // Sieve"/"Prime Rush" nel mezzo, e con pulsanti potenzialmente più grandi di prima
+  // ai lati) entri ancora su una riga sola: se andasse a capo, riduce il font-size
+  // del titolo appena quanto basta per farlo stare su una riga
+  function sizeTitleIconButtons(){
+    const h1 = document.getElementById('levelTitle');
+    const btns = document.querySelectorAll('.title-icon-row .mobile-icon-btn');
+    if (window.innerWidth <= 900){
+      // su mobile la CSS ha già le sue misure: pulisco eventuali stili inline
+      // rimasti da un resize precedente da desktop a mobile, altrimenti
+      // vincerebbero loro sulla regola della media query
+      if (h1) h1.style.fontSize = '';
+      btns.forEach(btn => { btn.style.width = ''; btn.style.height = ''; btn.style.fontSize = ''; });
+      return;
+    }
+    if (!h1 || !btns.length) return;
+
+    const diameter = 55;
+    btns.forEach(btn => {
+      btn.style.width = diameter + 'px';
+      btn.style.height = diameter + 'px';
+      btn.style.fontSize = (diameter * 0.4267) + 'px';
+    });
+
+    h1.style.fontSize = ''; // riparto sempre dal font-size CSS di base, mai da un valore già ridotto prima
+    const availableWidth = h1.getBoundingClientRect().width;
+    const baseFontSize = parseFloat(getComputedStyle(h1).fontSize);
+
+    const titleProbe = document.createElement('span');
+    const h1Style = getComputedStyle(h1);
+    titleProbe.style.fontFamily = h1Style.fontFamily;
+    titleProbe.style.fontWeight = h1Style.fontWeight;
+    titleProbe.style.fontSize = h1Style.fontSize;
+    titleProbe.style.whiteSpace = 'nowrap';
+    titleProbe.style.position = 'absolute';
+    titleProbe.style.visibility = 'hidden';
+    titleProbe.textContent = h1.textContent;
+    document.body.appendChild(titleProbe);
+    const neededWidth = titleProbe.getBoundingClientRect().width;
+    document.body.removeChild(titleProbe);
+
+    if (neededWidth > availableWidth && availableWidth > 0){
+      const scale = (availableWidth / neededWidth) * 0.97; // piccolo margine di sicurezza
+      h1.style.fontSize = (baseFontSize * scale) + 'px';
+    }
+  }
+
+  // posiziona badge+frase del rango a destra della griglia, allineati in alto col suo
+  // bordo superiore: calcolato dal vero (non hardcoded), così funziona a qualunque
+  // larghezza di finestra desktop, ma solo quando la griglia e il pannello laterale
+  // sono davvero affiancati (sopra i 1400px: sotto quella soglia si impilano, vedi CSS)
+  function positionRankBadge(){
+    const grid = document.getElementById('gridEl');
+    const sidePanel = document.querySelector('.side-panel-wrap');
+    const wide = window.innerWidth > 1400; // sotto questa soglia vale il CSS statico per il layout impilato
+
+    const badge = document.querySelector('.rank-badge');
+    const phrase = document.querySelector('.rank-phrase');
+    const callout = document.getElementById('rankCallout');
+    if (badge && phrase && callout && grid && sidePanel && wide){
+      const calloutRect = callout.getBoundingClientRect();
+      const gridRect = grid.getBoundingClientRect();
+      const sidePanelRect = sidePanel.getBoundingClientRect();
+
+      const top = gridRect.top - calloutRect.top;
+      const left = sidePanelRect.left + (sidePanelRect.width - badge.offsetWidth) / 2 - calloutRect.left;
+      badge.style.top = top + 'px';
+      badge.style.left = left + 'px';
+      phrase.style.top = (top + badge.offsetHeight + 8) + 'px';
+      phrase.style.left = left + 'px';
+    }
+  }
+
   function renderLevel(levelData){
     const grid = levelData.griglia;
-    const checkpoint = levelData.checkpoint;
     const circleColor = circleColorForLevel(levelNum);
     const rankInfo = rankForLevel(levelNum);
     // se il rango di QUESTO livello è diverso da quello del livello precedente, il badge si è appena sbloccato
@@ -777,36 +1062,64 @@
     wrap.style.setProperty('--circle-color', circleColor);
 
     document.getElementById('levelTitle').innerHTML =
-      `Eratostene <span class="accent">·</span> Level ${levelNum} <span class="accent max-prime-note">(max prime number = ${checkpoint})</span>`;
+      `Eratosthenes <span class="accent">·</span> Prime Rush <span class="accent">·</span> Level ${levelNum}`;
+    sizeTitleIconButtons();
 
-    document.getElementById('rankCallout').innerHTML = rankInfo
+    const rankCalloutEl = document.getElementById('rankCallout');
+    rankCalloutEl.classList.toggle('no-rank', !rankInfo);
+    rankCalloutEl.innerHTML = rankInfo
       ? `<span class="rank-badge">${rankInfo.title}</span><span class="rank-phrase">${rankInfo.phrase}</span>`
-      : '';
+      : `<span class="rank-badge">Placeholder rank</span><span class="rank-phrase">Placeholder phrase text goes here.</span>`;
 
     document.getElementById('levelLayout').innerHTML = `
       <div class="grid" id="gridEl"></div>
-      <div class="side-panel">
-        <div>
-          <div class="picked-row" id="pickedRow"></div>
+      <div class="side-panel-wrap">
+        <div class="side-panel">
+          <div>
+            <div class="picked-row" id="pickedRow"></div>
+          </div>
+          <div class="answer-row">
+            <input type="number" id="answerInput" placeholder="Sum of the primes" inputmode="numeric">
+            <button class="check" id="checkBtn"><span class="check-label">${checkLabelHtml}</span></button>
+          </div>
+          <p class="feedback" id="feedback"></p>
         </div>
-        <div class="answer-row">
-          <input type="number" id="answerInput" placeholder="Sum of the primes" inputmode="numeric">
-          <button class="check" id="checkBtn"><span class="check-label">${checkLabelHtml}</span></button>
-        </div>
-        <p class="feedback" id="feedback"></p>
       </div>
     `;
 
+    // valore di sicurezza: mai lasciare levelStartTime nullo, nel caso rarissimo in cui
+    // il giocatore interagisca prima ancora che i font risultino pronti
     levelStartTime = Date.now();
 
-    // segno la sessione come "aperta" e avvio il battito: se la pagina si chiude bruscamente,
-    // al prossimo caricamento troveremo qui l'ultimo tempo conosciuto invece di perderlo del tutto
-    localStorage.setItem(SESSION_OPEN_KEY, 'true');
-    if (heartbeatInterval) clearInterval(heartbeatInterval);
-    heartbeatInterval = setInterval(() => {
-      const elapsed = (Date.now() - levelStartTime) / 1000;
-      localStorage.setItem(HEARTBEAT_KEY, elapsed.toFixed(1));
-    }, 5000);
+    // sia il battito che il cronometro vero riprendono solo quando il giocatore ha
+    // completa visione della pagina: non al caricamento del DOM, ma quando i font sono
+    // davvero pronti — stessa tecnica usata per far partire l'animazione della card di
+    // Eratosthenes sull'index. Qui è una gara: se i font non risultano pronti entro 7
+    // secondi (già un margine ampio per un caricamento normale), qualcosa non va — meglio
+    // dirlo chiaramente con un errore che far finta di niente e partire comunque
+    let timerReallyStarted = false;
+    function reallyStartTimer(){
+      if (timerReallyStarted) return;
+      timerReallyStarted = true;
+      levelStartTime = Date.now(); // da qui in poi si conta per davvero
+
+      // segno la sessione come "aperta" e avvio il battito: se la pagina si chiude
+      // bruscamente, al prossimo caricamento troveremo qui l'ultimo tempo conosciuto
+      // invece di perderlo del tutto
+      localStorage.setItem(SESSION_OPEN_KEY, 'true');
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      heartbeatInterval = setInterval(() => {
+        const elapsed = (Date.now() - levelStartTime) / 1000;
+        localStorage.setItem(HEARTBEAT_KEY, elapsed.toFixed(1));
+      }, 5000);
+    }
+    const fontsPromise = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    fontsPromise.then(reallyStartTimer);
+    const fontsTimeoutId = setTimeout(() => {
+      if (timerReallyStarted) return;
+      showError('This is taking too long. Please reload the page.');
+    }, 7000);
+    fontsPromise.then(() => clearTimeout(fontsTimeoutId));
 
     // Home è un'uscita volontaria come un'altra: deposito il tempo prima di lasciare la pagina
     document.getElementById('homeBtn').addEventListener('click', () => {
@@ -841,6 +1154,9 @@
       cell.addEventListener('click', () => toggleCell(i));
       gridEl.appendChild(cell);
     });
+
+    positionRankBadge(); // solo ORA la griglia ha la sua altezza vera (celle già dentro)
+    randomizeConstellation(); // stesso motivo: serve l'altezza vera del contenitore
 
     function toggleCell(i){
       if (selected.has(i)){
@@ -882,6 +1198,7 @@
     }
     render();
     window.addEventListener('resize', render);
+    window.addEventListener('resize', sizeTitleIconButtons);
 
     // solo ORA il pannello destro ha davvero tutti e 5 i riquadri dentro: l'altezza misurata è quella reale
     alignSidePanel();
@@ -916,17 +1233,9 @@
 
         if (levelNum >= 200){
           playSound('winner');
-          const raceEnded = Date.now() > RACE_END_DATE.getTime();
-
-          if (raceEnded){
-            // la gara è finita per davvero: niente popup, dritti in home
-            window.location.href = 'index.html';
-            return;
-          } else {
-            // Prime Rush: il popup compare ad ogni run completata, non solo la prima volta
-            document.getElementById('finishTotalTime').textContent = (localStorage.getItem(TOTAL_TIME_KEY) || '0') + 's';
-            document.getElementById('finishModal').classList.add('visible');
-          }
+          // Prime Rush non ha una data di scadenza: il popup compare sempre a ogni run completata
+          document.getElementById('finishTotalTime').textContent = (localStorage.getItem(TOTAL_TIME_KEY) || '0') + 's';
+          document.getElementById('finishModal').classList.add('visible');
         } else {
           playSound('right');
           // risposta corretta: si passa subito al livello successivo, senza messaggio intermedio
@@ -962,16 +1271,22 @@
       note.style.color = 'var(--red)';
       return;
     }
+    if (nickname.length < 3){
+      note.textContent = 'Nickname must be at least 3 characters.';
+      note.style.color = 'var(--red)';
+      return;
+    }
 
     localStorage.setItem('erato_primerush_finisher_nickname', nickname);
     const totalRaceTime = localStorage.getItem(TOTAL_TIME_KEY) || '0';
+    const timeValue = parseFloat(totalRaceTime);
 
     // invio il tempo al Worker per il podio globale; se fallisce (rete assente, Worker giù)
     // l'utente prosegue comunque, non è bloccante
     fetch('https://eratostene.sl-eternal-lux.workers.dev/submit-primerush', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nickname, time: parseFloat(totalRaceTime) })
+      body: JSON.stringify({ nickname, time: timeValue })
     }).catch(() => {});
 
     window.location.href = 'index.html';
@@ -983,48 +1298,6 @@
 </script>
 
 <script src="mathemory-audio.js"></script>
-
-<script>
-  // --- pubblicità: ogni annuncio isolato nel proprio iframe, con il proprio atOptions privato.
-  // Il formato Adsterra "highperformanceformat" usa una variabile globale condivisa (atOptions):
-  // con più annunci sulla stessa pagina si sovrascrivono a vicenda se non isolati così.
-  // Il codice del dispositivo "sbagliato" non viene MAI creato nella pagina — evita impression
-  // non valide che romperebbero il rapporto con Adsterra.
-  (function(){
-    const isMobileDevice = window.innerWidth <= 900;
-    const AD_SLOTS_DESKTOP = [
-      { elementId: 'adSlotDesktopLeft',      key: 'a6525e43bef9221ab88fe82913548d2e', width: 160, height: 600 },
-      { elementId: 'adSlotDesktopTopRect',   key: '50f98522da8b5e97edc7f610cc39417c', width: 300, height: 250 },
-      { elementId: 'adSlotDesktopSideSmall', key: 'e9e96fb4584ea554b462b7eccbf26cba', width: 160, height: 300 },
-    ];
-    const AD_SLOTS_MOBILE = [
-      { elementId: 'adSlotMobileTop',    key: 'a2a9c900934d95ac8d859267d025b589', width: 320, height: 50 },
-      { elementId: 'adSlotMobileBottom', key: 'fd6daf0ccf42f29bcea4f242a1daa43f', width: 320, height: 50 },
-    ];
-
-    function injectAdIframe(elementId, key, width, height){
-      if (!key) return; // nessun codice ancora inserito per questo slot: resta il placeholder
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      el.innerHTML = '';
-      const iframe = document.createElement('iframe');
-      iframe.style.width = width + 'px';
-      iframe.style.height = height + 'px';
-      iframe.style.border = 'none';
-      iframe.style.display = 'block';
-      iframe.scrolling = 'no';
-      iframe.srcdoc =
-        '<!DOCTYPE html><html><head><style>body{margin:0;padding:0;overflow:hidden;}</style></head><body>' +
-        '<script>atOptions={"key":"' + key + '","format":"iframe","height":' + height + ',"width":' + width + ',"params":{}};<\/script>' +
-        '<script src="https://www.highperformanceformat.com/' + key + '/invoke.js"><\/script>' +
-        '</body></html>';
-      el.appendChild(iframe);
-    }
-
-    const slots = isMobileDevice ? AD_SLOTS_MOBILE : AD_SLOTS_DESKTOP;
-    slots.forEach(slot => injectAdIframe(slot.elementId, slot.key, slot.width, slot.height));
-  })();
-</script>
 
 </body>
 </html>

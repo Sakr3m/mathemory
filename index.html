@@ -43,20 +43,19 @@
     max-width: 2060px;
     margin: 0 auto;
     padding: 7vh 1.5rem 4vh;
+    position: relative;
   }
 
   /* --- masthead --- */
   header{
-    margin-bottom: 1.70vh;
+    margin-bottom: calc(2.5vh + 3px); /* 25px + 3px di margine della card = 28px sotto il divisorio */
   }
-  header::after{
-    content: '';
+  .header-divider{
     display: block;
     width: 22.3rem;
     max-width: 100%;
-    height: 1px;
-    background: var(--rule);
-    margin: 1.70vh auto 0;
+    height: 10px;
+    margin: 2.5vh auto 0;
   }
 
   .mark{
@@ -67,6 +66,28 @@
     max-width: 100%;
     text-align: center;
     text-transform: uppercase;
+  }
+
+  /* simboli che sostituiscono T, E, O nel titolo: font a parte perché Kalam
+     non ha questi glifi, valori em pensati per restare nell'ingombro delle
+     lettere normali (tranne la croce, che sfora di proposito in altezza) */
+  .mark-sym{
+    font-family: Arial, 'Helvetica Neue', sans-serif;
+    display: inline-block;
+    line-height: 1;
+  }
+  .mark-cross{
+    font-size: 1.2em;
+    vertical-align: 0.14em;
+    margin: 0 -0.02em;
+  }
+  .mark-sigma{
+    font-size: 0.82em;
+    vertical-align: 0.02em;
+  }
+  .mark-emptyset{
+    font-size: 0.8em;
+    vertical-align: 0.01em;
   }
 
   .subtitle{
@@ -85,31 +106,49 @@
     gap: 1.1rem;
   }
 
-  .game-slot{
-    display:flex;
-    flex-direction:column;
-  }
-
-  .game-card{
-    background: var(--bg-panel);
-    border: 1px solid var(--rule);
-    border-radius: 6px;
-    padding: 0.855rem;
-    text-decoration:none;
-    color: var(--ink);
-    display:flex;
-    flex-direction:column;
-    gap: 0.475rem;
-    transition: transform 0.15s ease, border-color 0.15s ease;
-  }
-
   .cta-inline:focus-visible{ outline: 2px solid var(--ink); outline-offset: 3px; }
 
-  .card-top-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap: 1rem;
+  .erato-content-half{
+    display: flex;
+    flex-direction: column;
+    gap: 0.475rem;
+    width: 50%;
+    flex-shrink: 0;
+  }
+  .erato-leaderboard-half{
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  /* le 6 tabelle (Sieve + Prime Rush) hanno tutte la stessa altezza, indipendentemente
+     da quanto altro testo ha ogni metà sopra di loro, e sono ristrette al 85% di
+     larghezza, centrate */
+  .erato-leaderboard-half .lb-row{
+    flex: 0 0 auto;
+    height: 2.6rem;
+    width: 85%;
+    margin-left: auto;
+    margin-right: var(--erato-lb-margin, 0px);
+  }
+  /* stesso allineamento a destra delle righe classifica, condiviso tramite la
+     variabile CSS --erato-lb-margin impostata una volta sola sulla card (vedi
+     applyEratoLbMargin): qualunque contenuto venga iniettato qui dentro in futuro
+     (dati aggiornati, popup RULES) la eredita automaticamente, senza bisogno di
+     riscriverla via JS a ogni singolo punto che tocca questo contenuto */
+  .leaderboard-card h2,
+  .leaderboard-card h3,
+  .race-end-inline,
+  .erato-rules-preview{
+    width: 85%;
+    margin-left: auto;
+    margin-right: var(--erato-lb-margin, 0px);
+  }
+  @keyframes erato-border-cycle{
+    0%   { border-color: rgba(232,196,104,0.85); box-shadow: 0 0 0 1px rgba(232,196,104,0.55), 0 0 0 2px rgba(232,196,104,0.25); }
+    33%  { border-color: rgba(217,121,58,0.85); box-shadow: 0 0 0 1px rgba(217,121,58,0.55), 0 0 0 2px rgba(217,121,58,0.25); }
+    66%  { border-color: rgba(193,85,75,0.85); box-shadow: 0 0 0 1px rgba(193,85,75,0.55), 0 0 0 2px rgba(193,85,75,0.25); }
+    100% { border-color: rgba(232,196,104,0.85); box-shadow: 0 0 0 1px rgba(232,196,104,0.55), 0 0 0 2px rgba(232,196,104,0.25); }
   }
 
   .play-preview-block{
@@ -123,22 +162,7 @@
     text-align: center;
     margin: 0;
   }
-  .cta-inline.cta-full-width{
-    display:block;
-    width: 100%;
-    box-sizing: border-box;
-    text-align: center;
-  }
-
-  .game-card h2{
-    font-family:'Kalam', cursive;
-    font-size: 3.192rem;
-    margin: 0;
-  }
-
-  .game-card.locked h2{ color: var(--ink-faint); font-size: 3.06rem; }
-
-  .game-card p.desc{
+  .desc{
     font-family:'Work Sans', sans-serif;
     color: var(--ink-dim);
     font-size: 1.097rem;
@@ -155,22 +179,32 @@
     display:block;
   }
 
-  .game-card.locked{
-    background: var(--bg-panel-locked);
-    border-style: dashed;
-    pointer-events: none;
-    align-items: center;
-    text-align: center;
-    justify-content: center;
-  }
-  .game-card.locked p.desc{ color: var(--ink-faint); }
-
   .unlock-date{
     font-family:'Space Mono', monospace;
     font-size: 1.5rem;
     color: var(--ink-faint);
     margin-top: 0.4rem;
   }
+
+  /* --- card "Coming Soon" (pagine dopo Eratosthenes): stessa dimensione esatta della
+     card di Eratosthenes, posizionata via JS (vedi buildComingSoonCard) --- */
+  .coming-soon-card{
+    position: absolute;
+    box-sizing: border-box;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-align: center;
+    background: var(--bg-panel-locked);
+    border: 1px dashed var(--rule);
+    border-radius: 6px;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .coming-soon-card .game-title-centered{ color: var(--ink-faint); }
 
   /* --- leaderboard vera: podio + record personali, due blocchi esattamente uguali --- */
   .leaderboard-card{
@@ -189,7 +223,8 @@
     font-size: 1.8rem;
     color: var(--ink);
     text-align: center;
-    margin: 0 0 0.6rem;
+    margin-top: 0;
+    margin-bottom: 0.6rem;
     flex-shrink: 0;
   }
   .leaderboard-card h3{
@@ -197,14 +232,15 @@
     font-size: 1.8rem;
     color: var(--ink);
     text-align: center;
-    margin: 0 0 0.6rem;
+    margin-top: 0;
+    margin-bottom: 0.6rem;
     flex-shrink: 0;
   }
   .lb-section{
     flex: 1 1 0;
     display:flex;
     flex-direction:column;
-    justify-content: space-evenly;
+    justify-content: center;
     gap: 0.5rem;
     min-height: 0;
   }
@@ -213,7 +249,8 @@
     font-family:'Space Mono', monospace;
     font-size: 0.75rem;
     color: rgba(243,239,228,0.5);
-    margin: 0 0 0.6rem;
+    margin-top: 0;
+    margin-bottom: 0.6rem;
   }
   .lb-row{
     flex: 1 1 0;
@@ -227,14 +264,58 @@
     border-radius: 6px;
     padding: 0 1rem;
   }
-  .lb-medal{ font-size: 1.32rem; line-height:1; }
-  .lb-label{ color: var(--ink-dim); font-size: 1rem; }
+  /* riga a doppia colonna (Prime Rush): griglia con colonna centrale a
+     larghezza fissa (quella della medaglia stessa) — così la medaglia non
+     si sposta MAI, qualunque sia la lunghezza dei nomi ai due lati. Ogni
+     nome ha a disposizione al massimo metà riga (la sua colonna da 1fr),
+     con troncamento invece di spingere oltre se dovesse comunque eccedere */
+  .lb-row-dual{
+    display:grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items:center;
+    gap: 0.5rem;
+  }
+  .lb-row-dual .lb-value:first-child{
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .lb-row-dual .lb-value:last-child{
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .lb-medal{ font-size: 1.452rem; line-height:1; }
+  .lb-row-dual .lb-value{ font-size: 0.81rem; }
   .lb-value{ color: var(--yellow); font-weight:700; font-size: 1rem; }
+  .lb-row.rank-1{ border-color: #E8C468; animation: rank-glow-gold 2.4s ease-in-out infinite; }
+  .lb-row.rank-2{ border-color: #C7CDD6; animation: rank-glow-silver 2.4s ease-in-out infinite; }
+  .lb-row.rank-3{ border-color: #D08A52; animation: rank-glow-bronze 2.4s ease-in-out infinite; }
+  @keyframes rank-glow-gold{
+    0%, 100%{ box-shadow: 0 0 0 rgba(232,196,104,0); }
+    50%{ box-shadow: 0 0 8px 1px rgba(232,196,104,0.55); }
+  }
+  @keyframes rank-glow-silver{
+    0%, 100%{ box-shadow: 0 0 0 rgba(199,205,214,0); }
+    50%{ box-shadow: 0 0 8px 1px rgba(199,205,214,0.55); }
+  }
+  @keyframes rank-glow-bronze{
+    0%, 100%{ box-shadow: 0 0 0 rgba(208,138,82,0); }
+    50%{ box-shadow: 0 0 8px 1px rgba(208,138,82,0.55); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .lb-row.rank-1, .lb-row.rank-2, .lb-row.rank-3{ animation: none; }
+  }
   .lb-divider{
     flex-shrink: 0;
-    height: 1px;
-    background: var(--rule);
-    margin: 0.8rem 0;
+    display: block;
+    height: 10px;
+    width: 50%;
+    margin: 0.8rem auto;
   }
 
   .cta-inline{
@@ -253,13 +334,13 @@
     border: none;
     cursor: pointer;
   }
-
-  .device-note{
-    font-family:'Space Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--ink-dim);
-    margin: 0;
+  .cta-inline.cta-full-width{
+    display:block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
   }
+
 
   .device-note-old{
     font-family:'Space Mono', monospace;
@@ -267,13 +348,6 @@
     color: rgba(243,239,228,0.5);
     margin: 0;
   }
-  .device-note-full{
-    width: 100%;
-    text-align: center;
-    margin-top: -0.275rem;
-    margin-bottom: -0.655rem;
-  }
-
   /* --- mini crivello 5x5, dentro le card attive --- */
   .preview-row{
     display:flex;
@@ -312,82 +386,118 @@
   }
 
   .mc.composite{ color: rgba(243,239,228,0.22); }
-  .mc.prime{ color: var(--ink); font-weight:700; }
-
-  .mc.prime svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
-  .mc.prime circle{
-    fill:none;
-    stroke: var(--yellow);
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-dasharray: 132;
-    stroke-dashoffset: 132;
-    animation: draw 0.8s ease forwards;
-    animation-delay: calc(var(--i) * 90ms + 0.3s);
+  .mc.prime{
+    font-weight:700;
+    border-radius: 6px;
+    animation: mc-light-up 1s ease forwards;
+    animation-delay: calc(var(--i) * 750ms + 3.5s);
+  }
+  @keyframes mc-light-up{
+    from{ color: var(--ink); background: transparent; box-shadow: none; }
+    to{
+      color: #1C1F16;
+      background: var(--yellow);
+      box-shadow: 0 0 8px 1px var(--yellow), 0 0 20px 5px var(--yellow);
+    }
   }
 
-  @keyframes draw{ to{ stroke-dashoffset: 0; } }
+  @media (prefers-reduced-motion: reduce){
+    .mc.prime{ animation:none; color:#1C1F16; background:var(--yellow); box-shadow: 0 0 8px 1px var(--yellow), 0 0 20px 5px var(--yellow); }
+  }
 
   @media (min-width: 901px){
     .lb-row{ background: var(--bg-table-desktop); }
   }
 
-  @media (prefers-reduced-motion: reduce){
-    .mc.prime circle{ animation:none; stroke-dashoffset:0; }
-  }
-
   /* --- carosello: contatore sopra, freccette ai lati dei giochi --- */
-  .game-number{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    min-height: 2rem;
-    font-family:'Space Mono', monospace;
-    font-size: 1.3rem;
-    letter-spacing: 0.06em;
-    color: var(--ink-dim);
-    margin-bottom: 0.938rem;
-  }
   .games-column{
     display:flex;
     flex-direction:column;
     flex: 1;
     min-width: 0;
+    align-self: flex-start;
   }
-  .game-label-row{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap: 0.7rem;
-    min-height: 2rem;
-    margin-bottom: 0.938rem;
-  }
-  .game-number-btn{
+  .erato-gamex-tag{
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-panel);
+    z-index: 2;
+    opacity: 0;
     font-family:'Work Sans', sans-serif;
     font-size: 1.43rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--ink-dim);
-    background: none;
-    border: 1px solid var(--rule);
-    border-radius: 6px;
+    border: 2px solid var(--ink-dim);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
     padding: 0.25rem 0.9rem;
-    cursor: pointer;
   }
-  .game-number-btn:hover{ color: var(--yellow); border-color: var(--yellow); }
-  .tap-hint{
+  .erato-title-row{
+    position: relative;
+  }
+  .erato-gamex-label{
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
     font-family:'Space Mono', monospace;
-    font-size: 0.85rem;
+    font-size: 1.265rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+  .erato-rules-preview{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 1rem;
+    height: 100%;
+    text-align: left;
+    box-sizing: border-box;
+  }
+  .erato-rules-preview h3{
+    font-family:'Kalam', cursive;
+    font-size: 1.8rem;
+    color: var(--ink);
+    margin: 0;
+    text-align: center;
+  }
+  .erato-rules-preview p{
+    font-family:'Work Sans', sans-serif;
+    font-size: 1.097rem;
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0;
+  }
+  .erato-rules-preview p.device-note-old{
+    font-family:'Space Mono', monospace;
+    font-size: 0.75rem;
+    line-height: normal;
     color: rgba(243,239,228,0.5);
   }
-  .game-number.race-end-label{
-    font-size: 0.95rem;
-  }
-  .game-number .race-end{
-    font-size: 0.9rem;
-    color: var(--ink-faint);
-  }
 
+  .erato-mid-divider{
+    position: absolute;
+    top: 25%;
+    height: 50%;
+    width: 10px;
+    transform: translateX(-50%);
+  }
+  .erato-mid-divider svg{ display: block; width: 100%; height: 100%; }
+  .erato-face-img{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-50%);
+    max-height: 20.87%;
+    width: auto;
+    pointer-events: none;
+    z-index: 2;
+  }
   /* --- overlay condiviso da tutti i popup (regole, scelta modalità, ecc.) --- */
   .modal-overlay{
     display:none;
@@ -520,6 +630,26 @@
     gap: 1rem;
   }
 
+  .wrap > header, .wrap > .carousel-row, .wrap > .mobile-snap-wrap{ position: relative; z-index: 1; }
+
+  .math-constellation{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .math-constellation text{
+    font-family:'Kalam', cursive;
+    font-size: 1.5rem;
+    fill: rgba(159, 176, 162, 0.20);
+    will-change: transform, opacity;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .math-constellation text{ transition: none !important; transform: none !important; }
+  }
+
   .carousel-row .games{ flex: 1; min-width: 0; }
 
   .nav-column{
@@ -529,7 +659,7 @@
     gap: 1.1rem;
   }
   .nav-dots{
-    display:none;
+    display:flex;
     flex-direction:column;
     align-items:center;
     gap: 0.9rem;
@@ -585,13 +715,13 @@
     .mobile-index-sound-btn{
       display: flex;
       position: absolute;
-      top: 75%;
+      top: 70%;
       left: 50%;
       transform: translateX(-50%);
       align-items: center;
       justify-content: center;
-      width: 44px;
-      height: 44px;
+      width: 50.6px;
+      height: 50.6px;
       border: 1px solid var(--rule);
       border-radius: 50%;
       background: var(--bg-panel);
@@ -600,6 +730,7 @@
       font-size: 1.2rem;
       cursor: pointer;
     }
+    .mobile-index-sound-btn svg{ width: 30.475px; height: 30.475px; }
   }
 
   /* --- fascia intermedia (finestra desktop stretta, non mobile): 1 sola card, contenuto essenziale --- */
@@ -632,6 +763,7 @@
     margin: 0 auto;
     align-items:start;
     padding: 0 1rem;
+    position: relative;
   }
   .ad-slot{
     position: sticky;
@@ -649,9 +781,10 @@
     letter-spacing:0.08em;
     text-transform:uppercase;
     color: var(--ink-faint);
+    z-index: 1;
   }
   .ad-a{ grid-area: adA; }
-  .ad-b-wrapper{ grid-area: adB; position: relative; align-self: stretch; }
+  .ad-b-wrapper{ grid-area: adB; position: relative; align-self: stretch; z-index: 1; }
   .ad-top-rect{
     position: absolute;
     top: 3.5vh;
@@ -676,7 +809,7 @@
     width: 160px;
     height: 300px;
   }
-  .content-col{ grid-area: content; min-width:0; max-width: 1600px; margin: 0 auto; width: 100%; }
+  .content-col{ grid-area: content; min-width:0; max-width: 1600px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
   .mobile-snap-wrap{ display: none; }
 
   @media (max-width: 900px){
@@ -688,23 +821,12 @@
       padding: 0;
       max-width: 100%;
     }
-  }
-
-  /* --- 2 slot dedicati e separati per mobile: mai gli stessi div del desktop, mai ridimensionati --- */
-  .ad-mobile-top, .ad-mobile-bottom{
-    display: none;
-    width: 320px;
-    height: 50px;
-    border: 1px dashed var(--rule);
-    border-radius: 6px;
-    background: var(--bg-panel);
-    align-items: center;
-    justify-content: center;
-    font-family:'Space Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
+    .ad-slot{
+      position: static;
+      width: 320px;
+      height: 50px;
+      margin: 0 auto;
+    }
   }
 
   /* ============================================================
@@ -712,22 +834,24 @@
      non toccano in alcun modo lo stile desktop sopra.
      ============================================================ */
   @media (max-width: 900px){
-    /* gli slot desktop si nascondono e basta: mai ridimensionati o riposizionati */
-    .ad-a, .ad-b-wrapper{ display: none; }
-    /* i 2 slot dedicati mobile prendono il loro posto, fissi, sempre 320x50 */
-    .ad-mobile-top{
-      display: flex;
+    /* i 2 banner (sopra e sotto) restano sempre visibili, fissi, "tagliano" la pagina */
+    .ad-slot{
       position: fixed;
       top: 0; left: 0; right: 0;
+      bottom: auto;
       width: 320px;
+      height: 50px;
       margin: 0 auto;
       z-index: 9000;
     }
-    .ad-mobile-bottom{
-      display: flex;
+    .ad-b-wrapper{ position: static; }
+    .ad-top-rect{ display: none; }
+    .ad-side-small{
       position: fixed;
+      top: auto;
       bottom: 0; left: 0; right: 0;
       width: 320px;
+      height: 50px;
       margin: 0 auto;
       z-index: 9000;
     }
@@ -819,7 +943,7 @@
       right: 1.5rem;
       margin: 0;
     }
-    .mobile-dots-row{ display: none; flex-direction: row; gap: 0.35rem; }
+    .mobile-dots-row{ display: flex; flex-direction: row; gap: 0.35rem; }
     .mobile-arrow{ min-width: 34px; min-height: 34px; }
 
     /* schermata del gioco: Game N a sinistra, il nome del gioco centrato sullo schermo */
@@ -880,6 +1004,7 @@
     .mobile-play-btn{
       display: block;
       width: 100%;
+      margin-bottom: 0.7rem;
       text-align:center;
       box-sizing: border-box;
       font-family:'Work Sans', sans-serif;
@@ -891,7 +1016,6 @@
       border-radius: 6px;
       text-decoration:none;
       border: none;
-      margin-bottom: 0.7rem;
       cursor: pointer;
     }
     .mobile-preview-block{
@@ -950,6 +1074,11 @@
       text-align:center;
       margin: 0 0 0.42rem;
     }
+    .race-end-inline{
+      width: auto;
+      margin-left: 0;
+      margin-right: 0;
+    }
     .mobile-records-block h3{
       font-family:'Kalam', cursive;
       font-size: clamp(2.1rem, 9.625vw, 2.8rem);
@@ -964,6 +1093,9 @@
     }
     .mobile-lb-block .lb-medal, .mobile-records-block .lb-medal{
       font-size: 0.77rem;
+    }
+    .mobile-records-block .lb-row-dual .lb-value{
+      font-size: 0.54rem;
     }
 
     /* --- popup regolamento su mobile: finestra fissa tra 15% e 85% dello schermo, scorrevole --- */
@@ -1018,14 +1150,16 @@
       display: table;
       margin: 0 auto;
     }
+    .title-row .mark, .subtitle, .nav-column{
+      opacity: 0; /* fade in di 0.5s appena i font sono pronti: vedi handleEratoIntro */
+      transition: opacity 0.5s ease;
+    }
+    .title-row .mark{
+      transform: translateY(0.28125px); /* per portare il centro del titolo esattamente a 127px dal bordo alto */
+    }
     .index-sound-btn{
       position: absolute;
-      top: 50%;
-      right: calc(100% + 126px);
-      transform: translateY(-50%);
       flex-shrink: 0;
-      width: 84px;
-      height: 84px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1034,9 +1168,16 @@
       background: var(--bg-panel);
       color: var(--ink-dim);
       font-family:'Space Mono', monospace;
-      font-size: 2.24rem;
       cursor: pointer;
-      transition: border-color 0.15s ease, color 0.15s ease;
+      transition: border-color 0.15s ease, color 0.15s ease, opacity 0.5s ease, background 0.15s ease, box-shadow 0.2s ease;
+      z-index: 50;
+      opacity: 0; /* stesso fade in sincronizzato di titolo/sottotitolo */
+    }
+    .index-sound-btn:hover{
+      color: var(--yellow);
+      border-color: rgba(232,196,104,0.75);
+      background: rgba(232,196,104,0.22);
+      box-shadow: 0 0 16px 3px rgba(232,196,104,0.48);
     }
     .mobile-index-sound-btn{ display: none; }
   }
@@ -1049,9 +1190,10 @@
   }
   .audio-slider-row label{
     font-family:'Work Sans', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.99rem;
     color: var(--ink-dim);
-    min-width: 5.5rem;
+    width: 6.05rem;
+    flex-shrink: 0;
   }
   .audio-slider-row input[type="range"]{
     flex: 1;
@@ -1059,12 +1201,22 @@
   }
   .audio-slider-row span{
     font-family:'Space Mono', monospace;
-    font-size: 0.85rem;
+    font-size: 0.935rem;
     color: var(--ink);
-    min-width: 2.8rem;
+    width: 3.08rem;
+    flex-shrink: 0;
     text-align: right;
   }
   .audio-toggle-btn{ cursor: pointer; }
+  .index-sound-btn svg{ width: 26.5px; height: 26.5px; }
+  /* stato "acceso" del volume (audio non muto): stessa illuminazione dei numeri
+     selezionati nella griglia, l'icona resta sempre la stessa, cambia solo questo */
+  .audio-toggle-btn.audio-on{
+    color: #1C1F16;
+    background: var(--yellow);
+    border-color: var(--yellow);
+    box-shadow: 0 0 8px 1px var(--yellow), 0 0 20px 5px var(--yellow);
+  }
 
   .rotate-lock-overlay{ display: none; }
   @media (orientation: landscape) and (max-width: 900px), (orientation: landscape) and (max-height: 500px){
@@ -1090,22 +1242,87 @@
 
 <audio id="bgMusic" src="eratostene_index.mp3" loop preload="none"></audio>
 
-<div class="ad-mobile-top" id="adSlotMobileTop" aria-hidden="true">Ad 320×50</div>
-<div class="ad-mobile-bottom" id="adSlotMobileBottom" aria-hidden="true">Ad 320×50</div>
-
 <div class="rotate-lock-overlay">Please rotate your device back to portrait to continue.</div>
 
 <div class="page-shell">
-  <div class="ad-slot ad-a" id="adSlotDesktopLeft" aria-hidden="true">Ad space</div>
+  <svg class="math-constellation" viewBox="0 0 1000 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <text x="848" y="288" text-anchor="middle">π</text>
+      <text x="363" y="232" text-anchor="middle">√</text>
+      <text x="276" y="227" text-anchor="middle">Σ</text>
+      <text x="872" y="147" text-anchor="middle">∞</text>
+      <text x="329" y="517" text-anchor="middle">∫</text>
+      <text x="601" y="656" text-anchor="middle">Δ</text>
+      <text x="706" y="542" text-anchor="middle">θ</text>
+      <text x="32" y="316" text-anchor="middle">×</text>
+      <text x="59" y="539" text-anchor="middle">÷</text>
+      <text x="206" y="841" text-anchor="middle">π</text>
+      <text x="862" y="225" text-anchor="middle">√</text>
+      <text x="549" y="427" text-anchor="middle">Σ</text>
+      <text x="217" y="369" text-anchor="middle">∞</text>
+      <text x="359" y="150" text-anchor="middle">∫</text>
+      <text x="119" y="594" text-anchor="middle">Δ</text>
+      <text x="576" y="510" text-anchor="middle">θ</text>
+      <text x="226" y="103" text-anchor="middle">×</text>
+      <text x="112" y="234" text-anchor="middle">÷</text>
+      <text x="743" y="603" text-anchor="middle">π</text>
+      <text x="952" y="478" text-anchor="middle">√</text>
+      <text x="639" y="751" text-anchor="middle">Σ</text>
+      <text x="581" y="108" text-anchor="middle">∞</text>
+      <text x="132" y="850" text-anchor="middle">∫</text>
+      <text x="754" y="787" text-anchor="middle">Δ</text>
+      <text x="247" y="790" text-anchor="middle">θ</text>
+      <text x="502" y="111" text-anchor="middle">×</text>
+      <text x="968" y="830" text-anchor="middle">÷</text>
+      <text x="833" y="580" text-anchor="middle">π</text>
+      <text x="139" y="308" text-anchor="middle">√</text>
+      <text x="485" y="672" text-anchor="middle">Σ</text>
+      <text x="154" y="389" text-anchor="middle">∞</text>
+      <text x="878" y="820" text-anchor="middle">∫</text>
+      <text x="443" y="799" text-anchor="middle">Δ</text>
+      <text x="573" y="283" text-anchor="middle">θ</text>
+      <text x="254" y="616" text-anchor="middle">×</text>
+      <text x="785" y="171" text-anchor="middle">÷</text>
+      <text x="816" y="853" text-anchor="middle">π</text>
+      <text x="423" y="43" text-anchor="middle">√</text>
+      <text x="65" y="83" text-anchor="middle">Σ</text>
+      <text x="70" y="793" text-anchor="middle">∞</text>
+      <text x="956" y="606" text-anchor="middle">∫</text>
+      <text x="87" y="696" text-anchor="middle">Δ</text>
+      <text x="512" y="738" text-anchor="middle">θ</text>
+      <text x="700" y="127" text-anchor="middle">×</text>
+      <text x="967" y="391" text-anchor="middle">÷</text>
+      <text x="455" y="619" text-anchor="middle">π</text>
+      <text x="843" y="522" text-anchor="middle">√</text>
+      <text x="956" y="57" text-anchor="middle">Σ</text>
+      <text x="747" y="38" text-anchor="middle">∞</text>
+      <text x="934" y="168" text-anchor="middle">∫</text>
+      <text x="443" y="419" text-anchor="middle">π</text>
+      <text x="234" y="643" text-anchor="middle">√</text>
+      <text x="213" y="265" text-anchor="middle">Σ</text>
+      <text x="284" y="166" text-anchor="middle">∞</text>
+      <text x="808" y="118" text-anchor="middle">∫</text>
+    </svg>
+  <div class="ad-slot ad-a" aria-hidden="true">Ad space</div>
 
   <div class="content-col">
   <div class="wrap">
   <header>
     <div class="title-row">
-      <button type="button" class="index-sound-btn audio-toggle-btn" aria-label="Sound">🔊</button>
-      <span class="mark">Mathemory</span>
+      <button type="button" class="index-sound-btn audio-toggle-btn" id="indexSoundBtn" aria-label="Sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8 8 0 0 1 0 12"/></svg></button>
+      <span class="mark" aria-label="Mathemory"><span aria-hidden="true">Ma<span class="mark-sym mark-cross">✝</span>h<span class="mark-sym mark-sigma">Σ</span>m<span class="mark-sym mark-emptyset">∅</span>ry</span></span>
     </div>
-    <p class="subtitle">A collection of math games, unlocking one after another over time.<br>Each one runs its own ~12-day race with a leaderboard ranked by fastest completion time.<br>Your progress is saved automatically, so you can always pick up right where you left off.</p>
+    <p class="subtitle">A collection of math games, unlocking one after another over time.<br>Each game has timed leaderboard modes and more relaxed modes just for fun.<br>Your progress is saved automatically, so you can always pick up right where you left off.</p>
+    <svg class="header-divider" viewBox="0 0 356 10" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="dividerFade" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="rgba(243,239,228,0)" />
+          <stop offset="18%" stop-color="rgba(243,239,228,0.12)" />
+          <stop offset="82%" stop-color="rgba(243,239,228,0.12)" />
+          <stop offset="100%" stop-color="rgba(243,239,228,0)" />
+        </linearGradient>
+      </defs>
+      <path d="M0,5 Q89,2 178,3.5 Q267,2 356,5 Q267,8 178,6.5 Q89,8 0,5 Z" fill="url(#dividerFade)" />
+    </svg>
   </header>
 
   <div class="carousel-row">
@@ -1119,7 +1336,6 @@
     </div>
 
     <div class="games-column">
-      <div class="game-label-row" id="gameLabelRow"></div>
       <div class="games" id="gamesGrid"></div>
     </div>
 
@@ -1139,8 +1355,8 @@
         <section class="snap-section" id="snapIntro">
           <div class="mobile-shifted-content">
             <span class="mark">Mathemory</span>
-            <p class="subtitle">A collection of math games, unlocking one after another over time.<br><br>Each one runs its own ~12-day race with a leaderboard ranked by fastest completion time.<br><br>Your progress is saved automatically, so you can always pick up right where you left off.</p>
-            <button type="button" class="mobile-index-sound-btn audio-toggle-btn" aria-label="Sound">🔊</button>
+            <p class="subtitle">A collection of math games, unlocking one after another over time.<br><br>Each game has timed leaderboard modes and more relaxed modes just for fun.<br><br>Your progress is saved automatically, so you can always pick up right where you left off.</p>
+            <button type="button" class="mobile-index-sound-btn audio-toggle-btn" aria-label="Sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8 8 0 0 1 0 12"/></svg></button>
             <p class="scroll-hint">↓ Scroll down to explore the games and the rest of the site. ↓</p>
           </div>
         </section>
@@ -1156,8 +1372,8 @@
   </div>
 
   <div class="ad-b-wrapper">
-    <div class="ad-top-rect" id="adSlotDesktopTopRect" aria-hidden="true">Ad 300×250</div>
-    <div class="ad-slot ad-side-small" id="adSlotDesktopSideSmall" aria-hidden="true">Ad 160×300</div>
+    <div class="ad-top-rect" aria-hidden="true">Ad 300×250</div>
+    <div class="ad-slot ad-side-small" aria-hidden="true">Ad 320×50</div>
   </div>
 </div>
 
@@ -1173,7 +1389,7 @@
 <div class="modal-overlay" id="rulesModal">
   <div class="rules-modal-card">
     <button type="button" class="rules-close-btn" id="rulesCloseBtn" aria-label="Close">✕</button>
-    <h3>Rules — Eratostene</h3>
+    <h3>Rules — Eratosthenes</h3>
     <p><strong>How to play:</strong> find the 5 hidden primes in the 5×5 grid, add up their values, enter the total. Correct answer = next level.</p>
     <p><strong>Modes:</strong> each mode has its own rules on time limits and leaderboards — check them when choosing your mode.</p>
     <p><strong>Fair play:</strong> out of respect for all participants, please don't cheat.</p>
@@ -1182,7 +1398,19 @@
 </div>
 
 <script>
+  // il browser (soprattutto Safari mobile) a volte ripristina una vecchia posizione
+  // di scroll tornando su questa pagina dalla cache di navigazione (es. rientrando da
+  // The Sieve col tasto Home), disallineando le schermate mobile a scatti rispetto a
+  // dove dovrebbero davvero stare. Disattivo il ripristino automatico e forzo la
+  // posizione a zero il più presto possibile, prima che qualunque altro layout scatti
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.scrollTo(0, 0);
+  window.addEventListener('pageshow', () => { window.scrollTo(0, 0); });
+
   // --- griglia decorativa 5x5, max 5 primi cerchiati ---
+  // ============================================================
+  // SEZIONE: DATI E COSTRUZIONE DEL GIOCO (Eratosthenes)
+  // ============================================================
   function buildMiniSieve(){
     const values =    [9, 7, 22, 34, 13,
                        15, 18, 29, 6, 21,
@@ -1194,12 +1422,27 @@
     values.forEach((v, i) => {
       const isPrime = primeIdx.includes(i);
       if (isPrime){
-        html += `<div class="mc prime" style="--i:${i}">${v}<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"/></svg></div>`;
+        html += `<div class="mc prime" style="--i:${i}">${v}</div>`;
       } else {
         html += `<div class="mc composite">${v}</div>`;
       }
     });
     return `<div class="mini-sieve">${html}</div>`;
+  }
+
+  // le 11 date mostrate su ciascuna card "Coming Soon": la seconda card (il primo
+  // "Coming Soon" dopo Eratosthenes) è il 1 agosto 2026, poi ogni data successiva è
+  // +12 giorni di calendario uniformi (stesso schema di raceEndLabels/unlockLabels).
+  // Calcolata in UTC puro (solo anno/mese/giorno, senza orario né fuso) per non
+  // dipendere dal fuso orario di chi esegue il codice
+  const comingSoonUnlockLabels = [];
+  {
+    let d = new Date(Date.UTC(2026, 7, 1)); // 1 agosto 2026
+    for (let i = 0; i < 11; i++){
+      comingSoonUnlockLabels.push(d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' }));
+      d = new Date(d);
+      d.setUTCDate(d.getUTCDate() + 12);
+    }
   }
 
   // --- le 11 date di sblocco per i "coming soon" ---
@@ -1223,10 +1466,10 @@
     return `${baseUrl}?n=${last}`;
   }
 
-  // --- una sola card attiva: Eratostene ---
+  // --- una sola card attiva: Eratosthenes ---
   const games = [
     {
-      title: 'Eratostene',
+      title: 'Eratosthenes',
       descTitle: 'Prime Numbers Game',
       desc: 'Find the primes hidden in the grid and add them up. Simple rules, a growing memory challenge as the numbers climb higher and higher. Every level tests how many you can still remember.',
       mobileDesc: 'Find the primes hidden in the grid and add them up. Every level tests how many you can still remember.',
@@ -1242,7 +1485,7 @@
 
   // date di fine gara per tutti e 12 i giochi (già formattate, stesso fuso Europa/Roma usato ovunque)
   const raceEndLabels = [
-    'July 31, 2026, 23:59 (UTC+02:00)',
+    'August 5, 2026, 23:59 (UTC+02:00)',
     'August 12, 2026, 23:59 (UTC+02:00)',
     'August 24, 2026, 23:59 (UTC+02:00)',
     'September 5, 2026, 23:59 (UTC+02:00)',
@@ -1259,17 +1502,17 @@
 
   // etichette già formattate (evita differenze di fuso tra il dispositivo dell'utente e il fuso di riferimento)
   const unlockLabels = [
-    'August 1 - 00:00 (UTC+02:00)',
-    'August 13 - 00:00 (UTC+02:00)',
-    'August 25 - 00:00 (UTC+02:00)',
-    'September 6 - 00:00 (UTC+02:00)',
-    'September 18 - 00:00 (UTC+02:00)',
-    'September 30 - 00:00 (UTC+02:00)',
-    'October 12 - 00:00 (UTC+02:00)',
-    'October 24 - 00:00 (UTC+02:00)',
-    'November 5 - 00:00 (UTC+01:00)',
-    'November 17 - 00:00 (UTC+01:00)',
-    'November 29 - 00:00 (UTC+01:00)',
+    'August 1',
+    'August 13',
+    'August 25',
+    'September 6',
+    'September 18',
+    'September 30',
+    'October 12',
+    'October 24',
+    'November 5',
+    'November 17',
+    'November 29',
   ];
 
   comingSoonDates.forEach((d, i) => {
@@ -1277,11 +1520,14 @@
   });
 
   function gameState(g){
-    if (!g.start) return 'open'; // Eratostene: sempre aperto, nessun gating
+    if (!g.start) return 'open'; // Eratosthenes: sempre aperto, nessun gating
     return 'upcoming';
   }
 
   // --- suono tap.mp3: generico, riusato su tutti i pulsanti della pagina ---
+  // ============================================================
+  // SEZIONE: AUDIO — effetti sonori (tap, right, wrong, winner...)
+  // ============================================================
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const soundBuffers = {};
   function loadSound(name, url){
@@ -1306,6 +1552,9 @@
     source.start(0);
   }
 
+  // ============================================================
+  // SEZIONE: STATO GLOBALE — carosello, cache altezza/classifiche
+  // ============================================================
   let currentIndex = 0;
   const maxIndex = games.length - 1;
   // per ora si può navigare solo fino a Game 2: niente promesse sugli altri 10 finché non vediamo come va
@@ -1313,17 +1562,82 @@
 
   let cachedEratoHeight = null;
 
+  // posizione/dimensione condivisa da Eratosthenes e da tutte le card "Coming Soon": calcolata
+  // una sola volta (vedi computeCardGeometry), così restano sempre esattamente identiche
+  let cardGeometry = null;
+  // overlay "Coming Soon" già costruiti, indicizzati per pagina (currentIndex): costruiti al
+  // primo passaggio, poi solo mostrati/nascosti
+  const comingSoonOverlays = {};
+  // id dei setTimeout della sequenza di apertura di Eratosthenes ancora in attesa: se si
+  // naviga via prima che scadano, vanno cancellati (vedi playEratoIntroOverlay/render)
+  let eratoIntroTimeoutIds = [];
+  // true solo quando i font (Kalam/Work Sans) sono DAVVERO pronti: finché non lo sono,
+  // computeCardGeometry calcola comunque un valore (necessario per costruire una card
+  // "Coming Soon" richiesta troppo presto) ma non lo mette in cache, per non bloccare per
+  // sempre una misura fatta con font di fallback
+  let fontsReadyForGeometry = !(document.fonts && document.fonts.ready);
+  if (document.fonts && document.fonts.ready){
+    document.fonts.ready.then(() => { fontsReadyForGeometry = true; });
+  }
+
   // --- podio globale: letto dal Cloudflare Worker, null finché non arriva la prima risposta ---
   let cachedPodium = null;
   let cachedPrimeRushPodium = null;
+  let eratoOverlayEl = null; // riferimento alla card animata (se già creata), per aggiornare la classifica quando arrivano dati freschi dal Worker
+
+  // margine destro della classifica: misurato dal vero (dipende solo dal padding interno,
+  // non dalla larghezza della card), condiviso tra refreshEratoLeaderboard (quando i dati
+  // arrivano dopo che la card è già finalizzata) e playEratoIntroOverlay (applicato subito
+  // dopo la creazione, mentre la card è ancora invisibile, per evitare il salto visibile)
+  function applyEratoLbMargin(overlay, lbHalf){
+    const miniSieve = overlay.querySelector('.mini-sieve');
+    if (!miniSieve) return;
+    // il bordo della card va tolto dal gap misurato: altrimenti finisce contato due volte
+    // (una volta implicito nel leftGap, una volta nel bordo destro reale quando il margine
+    // viene applicato), spostando la classifica di 1px in più rispetto alla griglia invece
+    // di restare alla stessa identica distanza
+    const overlayBorderWidth = parseFloat(getComputedStyle(overlay).borderLeftWidth) || 0;
+    const leftGap = miniSieve.getBoundingClientRect().left - overlay.getBoundingClientRect().left - overlayBorderWidth;
+    const lbHalfPaddingRight = lbHalf ? (parseFloat(getComputedStyle(lbHalf).paddingRight) || 0) : 0;
+    const marginRight = Math.max(0, leftGap - lbHalfPaddingRight);
+    // impostata UNA VOLTA come variabile CSS sulla card: qualunque contenuto venga
+    // iniettato dentro (ora o in futuro, da qualunque punto del codice) la eredita
+    // automaticamente tramite la regola CSS, senza bisogno di riscriverla via JS
+    overlay.style.setProperty('--erato-lb-margin', marginRight + 'px');
+  }
+
+  // aggiorna la classifica dentro la card già visibile, se esiste — altrimenti i dati
+  // arrivati dopo la comparsa non si vedrebbero mai (l'overlay non viene ricostruito
+  // da render(), che tocca solo il segnaposto invisibile nella griglia)
+  function refreshEratoLeaderboard(){
+    if (!eratoOverlayEl) return;
+    const lbHalf = eratoOverlayEl.querySelector('.erato-leaderboard-half');
+    if (!lbHalf) return;
+    const freshHtml = eratoLbPreviewHtml(games[0]);
+    if (lbHalf._isShowingRules){
+      // RULES è in vista ora: aggiorno solo il contenuto "vero" salvato per dopo,
+      // non tocco il DOM finché non si esce con il mouse
+      lbHalf._realLbHtml = freshHtml;
+      return;
+    }
+    lbHalf.innerHTML = freshHtml;
+    lbHalf._realLbHtml = lbHalf.innerHTML;
+    // l'allineamento a destra arriva da solo dalla variabile CSS --erato-lb-margin
+    // già impostata sulla card (vedi applyEratoLbMargin): qualunque contenuto nuovo
+    // la eredita automaticamente, non serve più ricalcolarla o riapplicarla qui
+  }
   const LEADERBOARD_API = 'https://eratostene.sl-eternal-lux.workers.dev';
 
+  // ============================================================
+  // SEZIONE: CLASSIFICHE — fetch dei dati dal Worker Cloudflare
+  // ============================================================
   function fetchLeaderboard(){
     fetch(`${LEADERBOARD_API}/leaderboard`)
       .then(r => r.json())
       .then(data => {
         cachedPodium = data.podium || [];
         render();
+        refreshEratoLeaderboard();
       })
       .catch(() => {
         // se il Worker non risponde, restano i trattini: nessun errore mostrato all'utente
@@ -1336,94 +1650,131 @@
       .then(data => {
         cachedPrimeRushPodium = data.podium || [];
         render();
+        refreshEratoLeaderboard();
       })
       .catch(() => {
         // se il Worker non risponde, restano i trattini: nessun errore mostrato all'utente
       });
   }
 
-  function podiumRowsHtml(podium){
+  // 3 righe, ognuna ospita 2 classifiche affiancate con la stessa medaglia al centro:
+  // tempo - nickname (sinistra, già implementata) - medaglia - nickname - tempo (destra,
+  // riservata per una seconda classifica non ancora implementata: passare null lì)
+  function dualPodiumRowsHtml(leftPodium, rightPodium){
     const medals = ['🥇', '🥈', '🥉'];
+    const rankClasses = ['rank-1', 'rank-2', 'rank-3'];
     let html = '';
     for (let i = 0; i < 3; i++){
-      const entry = podium && podium[i];
-      const label = entry ? `${entry.nickname} — ${entry.time}s` : '—';
-      html += `<div class="lb-row"><span class="lb-medal">${medals[i]}</span><span class="lb-value">${label}</span></div>`;
+      const leftEntry = leftPodium && leftPodium[i];
+      const rightEntry = rightPodium && rightPodium[i];
+      const leftLabel = leftEntry ? `${leftEntry.nickname} — ${leftEntry.time}s` : '—';
+      const rightLabel = rightEntry ? `${rightEntry.nickname} — ${rightEntry.time}s` : '—';
+      html += `
+        <div class="lb-row lb-row-dual ${rankClasses[i]}">
+          <span class="lb-value">${leftLabel}</span>
+          <span class="lb-medal">${medals[i]}</span>
+          <span class="lb-value">${rightLabel}</span>
+        </div>`;
     }
     return html;
   }
 
+  // ============================================================
+  // SEZIONE: CLASSIFICHE — generazione HTML del podio
+  // ============================================================
+  function podiumRowsHtml(podium, count){
+    count = count || 3;
+    const medals = ['🥇', '🥈', '🥉'];
+    const rankClasses = ['rank-1', 'rank-2', 'rank-3'];
+    let html = '';
+    for (let i = 0; i < count; i++){
+      const entry = podium && podium[i];
+      const medal = medals[i] || `${i + 1}.`;
+      const rankClass = rankClasses[i] || '';
+      const label = entry ? `${entry.nickname} — ${entry.time}s` : '—';
+      html += `<div class="lb-row ${rankClass}"><span class="lb-medal">${medal}</span><span class="lb-value">${label}</span></div>`;
+    }
+    return html;
+  }
+
+  // ============================================================
+  // SEZIONE: CARD DEI GIOCHI — generazione HTML (desktop)
+  // Il ramo "open" (Eratosthenes) genera solo un segnaposto invisibile:
+  // il contenuto vero vive in eratoContentHtml()/eratoLbPreviewHtml()
+  // qui sotto, usato dalla card animata indipendente più in basso.
+  // ============================================================
   function gameCardHtml(g, number){
     const state = gameState(g);
     if (state === 'open'){
-      const href = resumeHref(g.hrefKey, g.hrefBase);
-      return `
-        <div class="game-slot">
-          <div class="game-card">
-            <h2 class="game-title-centered">${g.title}</h2>
-            <div class="play-preview-block">
-              <button type="button" class="cta-inline cta-full-width" onclick="openModeModal(0)">Play now</button>
-              <div class="preview-row">
-                ${g.preview || ''}
-                <div class="preview-text-col">
-                  <p class="desc"><span class="desc-title">${g.descTitle}</span>${g.desc}</p>
-                </div>
-              </div>
-              <p class="device-note-old device-note-full">Progress is saved per device — switching devices restarts from level 1.</p>
-            </div>
-          </div>
-        </div>`;
+      // niente segnaposto: la posizione/dimensione si calcola direttamente dalla
+      // griglia stessa (vedi handleEratoIntro), la card vera vive solo nella copia
+      // animata indipendente
+      return '';
     } else {
-      const heightStyle = cachedEratoHeight ? `style="height:${cachedEratoHeight}px"` : '';
-      return `
-        <div class="game-slot">
-          <div class="game-card locked" ${heightStyle}>
-            <h2>COMING SOON</h2>
-            <p class="unlock-date">${g.unlockLabel}</p>
-          </div>
-        </div>`;
+      // stesso discorso per le pagine "Coming Soon": niente segnaposto nella griglia,
+      // la card vera vive nella copia indipendente costruita da showComingSoonPage()
+      return '';
     }
   }
 
-  function leaderboardCardHtml(g){
-    const state = gameState(g);
-    const heightStyle = cachedEratoHeight ? `style="height:${cachedEratoHeight}px"` : '';
-
-    if (state === 'open'){
-      return `
-        <div class="game-slot">
-          <div class="game-card leaderboard-card" ${heightStyle}>
-            <div class="lb-half">
-              <h2>The Sieve</h2>
-              <p class="race-end-inline">The race ends on ${g.raceEnd}</p>
-              <div class="lb-section">
-                ${podiumRowsHtml(cachedPodium)}
-              </div>
-            </div>
-            <div class="lb-divider"></div>
-            <div class="lb-half">
-              <h3>Prime Rush</h3>
-              <div class="lb-section">
-                ${podiumRowsHtml(cachedPrimeRushPodium)}
-              </div>
-            </div>
-          </div>
-        </div>`;
-    }
-
+  // genera il contenuto della classifica direttamente dai dati già in cache — usata dal
+  // pannello dentro la card allargata, indipendente dalla vecchia card della leaderboard
+  // (che potrebbe anche non esistere più in futuro)
+  // contenuto vero della card di Eratosthenes (titolo, pulsanti, anteprima, descrizione):
+  // non vive più come markup statico nella griglia, viene costruito solo quando serve
+  // per popolare la card animata
+  function eratoContentHtml(g){
     return `
-      <div class="game-slot">
-        <div class="game-card locked" ${heightStyle}>
-          <h2>LEADERBOARD</h2>
-          <p class="race-end-inline">The race ends on ${g.raceEnd}</p>
-          <p class="unlock-date">Unlocks with the game.</p>
+      <div class="erato-title-row">
+        <div class="erato-gamex-label">GAME 1</div>
+        <h2 class="game-title-centered">${g.title}</h2>
+      </div>
+      <div class="play-preview-block">
+        <button type="button" class="cta-inline cta-full-width" onclick="openModeModal(0, false)">Play now</button>
+        <div class="preview-row">
+          ${g.preview || ''}
+          <div class="preview-text-col">
+            <p class="desc"><span class="desc-title">${g.descTitle}</span>${g.desc}</p>
+          </div>
         </div>
       </div>`;
   }
 
+  function eratoLbPreviewHtml(g){
+    return `
+      <div class="lb-half">
+        <h2>The Sieve</h2>
+        <p class="race-end-inline">The race ends on ${g.raceEnd}</p>
+        <div class="lb-section">
+          ${podiumRowsHtml(cachedPodium)}
+        </div>
+      </div>
+      <svg class="lb-divider" viewBox="0 0 356 10" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="lbDividerFade" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="rgba(243,239,228,0)" />
+            <stop offset="18%" stop-color="rgba(243,239,228,0.12)" />
+            <stop offset="82%" stop-color="rgba(243,239,228,0.12)" />
+            <stop offset="100%" stop-color="rgba(243,239,228,0)" />
+          </linearGradient>
+        </defs>
+        <path d="M0,5 Q89,2 178,3.5 Q267,2 356,5 Q267,8 178,6.5 Q89,8 0,5 Z" fill="url(#lbDividerFade)" />
+      </svg>
+      <div class="lb-half">
+        <h3>Prime Rush</h3>
+        <div class="lb-section">
+          ${dualPodiumRowsHtml(cachedPrimeRushPodium, null)}
+        </div>
+      </div>`;
+  }
+
+  // ============================================================
+  // SEZIONE: CARD DEI GIOCHI — generazione HTML (mobile)
+  // ============================================================
   function mobileNavRowHtml(){
     let dots = '';
-    for (let i = 1; i <= 12; i++){
+    const totalDots = NAV_LIMIT_INDEX + 1;
+    for (let i = 1; i <= totalDots; i++){
       dots += `<div class="nav-dot${i === currentIndex + 1 ? ' active' : ''}"></div>`;
     }
     return `
@@ -1445,7 +1796,7 @@
         <div class="mobile-shifted-content">
           <h2 class="mobile-game-title">COMING SOON</h2>
           <div class="mobile-game-header">
-            <button type="button" class="mobile-game-number" onclick="openRulesModal()">Game ${number}</button>
+            <button type="button" class="mobile-game-number" onclick="openRulesModal()">Game ${number} - Rules</button>
             <p class="mobile-tap-hint">Tap Game ${number} to read the rules.</p>
           </div>
           <p class="mobile-locked-desc">${g.unlockLabel}</p>
@@ -1457,11 +1808,11 @@
       <div class="mobile-shifted-content">
         <h2 class="mobile-game-title">${g.title}</h2>
         <div class="mobile-game-header">
-          <button type="button" class="mobile-game-number" onclick="openRulesModal()">Game ${number}</button>
+          <button type="button" class="mobile-game-number" onclick="openRulesModal()">Game ${number} - Rules</button>
           <p class="mobile-tap-hint">Tap Game ${number} to read the rules.</p>
         </div>
         <div class="mobile-play-preview-block">
-          <button type="button" class="mobile-play-btn" onclick="openModeModal(0)">Play now</button>
+          <button type="button" class="mobile-play-btn" onclick="openModeModal(0, false)">Play now</button>
           <div class="mobile-preview-block">
             ${g.preview || ''}
             <div class="mobile-desc-block">
@@ -1497,33 +1848,85 @@
         <div class="mobile-records-block">
           <h3>Prime Rush</h3>
           <div class="lb-section">
-            ${podiumRowsHtml(cachedPrimeRushPodium)}
+            ${dualPodiumRowsHtml(cachedPrimeRushPodium, null)}
           </div>
         </div>
       </div>`;
   }
 
-  function render(){
+  // ============================================================
+  // SEZIONE: RENDER PRINCIPALE — chiamato a ogni cambio pagina del
+  // carosello, ridimensionamento, arrivo dati classifiche, ecc.
+  // isNavigation è true solo quando la chiamata arriva da un vero cambio pagina
+  // (freccette del carosello): solo in quel caso la card fa la sua comparsa
+  // (fade-in, nessun movimento) — un resize o un aggiornamento della classifica
+  // non devono far ricomparire nulla
+  // ============================================================
+  function render(isNavigation){
     const grid = document.getElementById('gamesGrid');
     const g = games[currentIndex];
     const number = currentIndex + 1;
 
-    grid.innerHTML = gameCardHtml(g, number) + leaderboardCardHtml(g);
-
-    // etichetta centrale sopra la riga: Game X cliccabile (porta al regolamento, quando esisterà) + suggerimento
-    document.getElementById('gameLabelRow').innerHTML = `
-      <button type="button" class="game-number-btn" onclick="openRulesModal()">Game ${number}</button>
-      <span class="tap-hint">Tap Game ${number} to read the rules.</span>`;
-
-    // l'altezza di riferimento è sempre quella naturale di Eratostene (il gioco vero), non della leaderboard
-    const cards = grid.querySelectorAll('.game-card');
-    cards.forEach(c => { c.style.height = ''; });
-    const openCard = grid.querySelector('.game-card:not(.locked):not(.leaderboard-card)');
-    if (openCard){
-      cachedEratoHeight = openCard.offsetHeight;
-    }
-    if (cachedEratoHeight){
-      cards.forEach(c => { c.style.height = cachedEratoHeight + 'px'; });
+    grid.innerHTML = gameCardHtml(g, number);
+    positionIndexSoundBtn();
+    centerEratoRightEdge();
+    if (gameState(g) === 'open'){
+      // la card vera (l'overlay) vive fuori dalla griglia: se era stata nascosta
+      // per una pagina diversa, la rimostro; le eventuali card "Coming Soon" vanno
+      // invece nascoste, altrimenti resterebbero visibili sopra a tutto anche qui
+      Object.values(comingSoonOverlays).forEach(el => { el.style.display = 'none'; });
+      if (grid.dataset.eratoIntroPlayed !== 'true'){
+        handleEratoIntro(grid, g, number);
+      } else if (isNavigation){
+        // ritorno alla prima pagina dal carosello: stessa sequenza delle altre pagine
+        // (stretta, fade in, pausa, allargamento), solo che qui la card riparte dalla
+        // sua identica dimensione finale già nota; il contenuto interno (mini-griglia,
+        // classifica, ecc.) resta quello che era, non viene ricostruito.
+        // riga divisoria/GAME 1/ritratto hanno una posizione X fissa in pixel calcolata
+        // sulla larghezza piena: se la card si restringe con loro già visibili, l'overflow
+        // hidden li taglia via finché l'allargamento non li "raggiunge" di nuovo (il
+        // "pezzettino di RESET" segnalato). Li nascondo prima di restringere, e li
+        // faccio ricomparire con la stessa dissolvenza di 1s usata alla primissima
+        // comparsa, ma solo a sequenza (fade+pausa+allargamento) completamente finita
+        const geometry = computeCardGeometry(g, number);
+        const dividerLine = eratoOverlayEl.querySelector('.erato-mid-divider');
+        const gamexTag = eratoOverlayEl.querySelector('.erato-gamex-tag');
+        const faceImg = eratoOverlayEl.querySelector('.erato-face-img');
+        [dividerLine, gamexTag, faceImg].forEach(el => {
+          if (!el) return;
+          el.style.transition = 'none';
+          el.style.opacity = '0';
+        });
+        if (gamexTag) gamexTag.style.pointerEvents = 'none'; // non hoverabile finché non è del tutto comparso
+        playCardNavAnimation(eratoOverlayEl, geometry.top, geometry.left, geometry.width, geometry.height, () => {
+          [dividerLine, gamexTag, faceImg].forEach(el => {
+            if (!el) return;
+            void el.offsetWidth;
+            el.style.transition = 'opacity 1s ease';
+            el.style.opacity = '1';
+          });
+          if (gamexTag) setTimeout(() => { gamexTag.style.pointerEvents = 'auto'; }, 1000);
+        });
+      } else if (eratoOverlayEl && eratoOverlayEl.dataset.eratoFinalized === 'true'){
+        // forzo opacità/display solo se la sequenza di comparsa è già del tutto
+        // conclusa: farlo mentre è ancora in corso (es. un resize a metà animazione)
+        // tronca di colpo il fade lasciando il movimento a proseguire per conto suo
+        eratoOverlayEl.style.display = 'flex';
+        eratoOverlayEl.style.opacity = '1';
+      }
+    } else {
+      // pagina diversa da Eratosthenes: la sua card (l'overlay) va nascosta, altrimenti
+      // resterebbe visibile sopra a tutto anche qui
+      if (eratoOverlayEl){
+        eratoOverlayEl.style.display = 'none';
+        // se la sequenza di apertura era ancora in corso (utente ha cliccato "next"
+        // molto rapidamente), i timeout residui vanno cancellati: altrimenti
+        // scatterebbero più tardi su un overlay nascosto, misurando rettangoli a
+        // zero e scrivendo dividerX=0 in modo permanente (vedi FIX 2)
+        eratoIntroTimeoutIds.forEach(id => clearTimeout(id));
+        eratoIntroTimeoutIds.length = 0;
+      }
+      showComingSoonPage(currentIndex, isNavigation);
     }
 
     document.getElementById('prevBtn').classList.toggle('disabled', currentIndex === 0);
@@ -1549,34 +1952,625 @@
     }
   }
 
-  // misura l'altezza vera di Eratostene una volta, fuori schermo, così ogni pagina (anche quelle
+  // misura l'altezza vera di Eratosthenes una volta, fuori schermo, così ogni pagina (anche quelle
   // con giochi ancora bloccati) parte già con l'altezza corretta, senza dover prima "passarci sopra"
   function measureEratoHeight(){
     const realGrid = document.getElementById('gamesGrid');
     if (!realGrid) return;
+    const g = games[0];
     const probe = document.createElement('div');
-    probe.className = 'games';
     probe.style.position = 'absolute';
     probe.style.visibility = 'hidden';
     probe.style.pointerEvents = 'none';
     probe.style.left = '-9999px';
     probe.style.width = realGrid.offsetWidth + 'px';
-    probe.innerHTML = gameCardHtml(games[0], 1) + leaderboardCardHtml(games[0]);
+    probe.style.display = 'flex';
+    probe.style.flexDirection = 'row';
+    probe.innerHTML = `
+      <div class="erato-content-half" style="width:50%; flex-shrink:0; box-sizing:border-box; padding:0.855rem; display:flex; flex-direction:column; gap:0.475rem;">
+        ${eratoContentHtml(g)}
+      </div>
+      <div class="erato-leaderboard-half leaderboard-card" style="flex:1 1 auto; min-width:0; box-sizing:border-box; padding:0.855rem;">
+        ${eratoLbPreviewHtml(g)}
+      </div>`;
     document.body.appendChild(probe);
-    const card = probe.querySelector('.game-card:not(.locked):not(.leaderboard-card)');
-    if (card) cachedEratoHeight = card.offsetHeight;
+    cachedEratoHeight = probe.offsetHeight;
     document.body.removeChild(probe);
   }
 
+  // pulsante audio di index (desktop): allineato in orizzontale con l'inizio delle card,
+  // centrato in verticale col titolo, diametro = 1.5x l'altezza del titolo. Spostato nel
+  // body e posizionato con coordinate reali di pagina, per scorrere insieme al contenuto
+  // (i due riferimenti — titolo e card — non condividono lo stesso genitore diretto)
+  // ============================================================
+  // SEZIONE: ERATOSTHENES — apertura automatica animata
+  // La card vera è solo un segnaposto invisibile (vedi gameCardHtml);
+  // questa sezione costruisce e anima l'UNICA card visibile, in modo
+  // indipendente dal ciclo di render() (vedi POST-IT esterno per il
+  // backup del vecchio markup statico, se mai servisse ripristinarlo).
+  // ============================================================
+  let indexSoundBtnMovedToBody = false;
+  // sposta l'intera griglia dei 2 giochi in modo che il lato destro della card di
+  // Eratostene (il confine tra le 2 card) cada esattamente al centro reale della finestra,
+  // non solo al centro della sua colonna. Misurato dal vero, non un valore fisso.
+  // gestisce l'apertura automatica al caricamento: la card vera (statica, sempre corretta)
+  // resta nascosta finché la copia animata indipendente non ha finito il suo lavoro
+  // centra verticalmente le colonne di navigazione (frecce + pallini) rispetto
+  // all'altezza VERA della card, che ora vive fuori dal flusso normale (è una copia
+  // indipendente posizionata via JS), quindi il centraggio CSS di .carousel-row non
+  // la vede più e non basta da solo
+  function centerNavColumns(cardTop, cardHeight){
+    const cardCenterY = cardTop + cardHeight / 2;
+    document.querySelectorAll('.nav-column').forEach(nav => {
+      nav.style.transform = 'none';
+      void nav.offsetHeight;
+      const navRect = nav.getBoundingClientRect();
+      const navCenterY = navRect.top + window.scrollY + navRect.height / 2;
+      const shift = cardCenterY - navCenterY;
+      nav.style.transform = `translateY(${shift}px)`;
+    });
+  }
+
+  // calcola una sola volta la posizione/dimensione comune a TUTTE le card (Eratosthenes
+  // e ognuna delle "Coming Soon" che la seguono): le une copiano gli stessi identici
+  // valori delle altre, così restano sempre esattamente della stessa dimensione
+  function computeCardGeometry(g, number){
+    if (cardGeometry) return cardGeometry;
+    const grid = document.getElementById('gamesGrid');
+    // larghezza calcolata come una singola colonna della griglia, immaginata con il
+    // lato destro al centro della pagina, poi raddoppiata verso destra: quello è il
+    // totale per la card di Eratosthenes + classifica
+    const gridRect = grid.getBoundingClientRect();
+    const gridStyle = getComputedStyle(grid);
+    const gap = parseFloat(gridStyle.columnGap || gridStyle.gap) || 0;
+    const singleColWidth = (gridRect.width - gap) / 2;
+
+    const viewportCenter = window.innerWidth / 2;
+    const targetWidth = singleColWidth * 2;
+    const targetLeft = viewportCenter - singleColWidth;
+    const targetTop = gridRect.top + window.scrollY;
+
+    // l'altezza la misuro qui, da zero, con una prova di contenuto vero, apposta
+    // per NON dipendere mai da cachedEratoHeight — quella variabile è condivisa con
+    // altri punti del codice ed è già stata causa di bug quando qualcosa la sporcava
+    // in un momento sbagliato
+    const targetHeight = measureEratoContentHeight(g, number, targetWidth);
+
+    const geometry = { top: targetTop, left: targetLeft, width: targetWidth, height: targetHeight };
+    // memoizzo solo se i font sono già davvero pronti: se qualcuno chiama questa funzione
+    // prima (es. buildComingSoonCard invocata troppo presto), il valore misurato con font
+    // di fallback NON va in cache, altrimenti resterebbe sbagliato per sempre anche dopo
+    // che handleEratoIntro la richiama a font ormai pronti
+    if (fontsReadyForGeometry) cardGeometry = geometry;
+    return geometry;
+  }
+
+  // riallinea le eventuali card "Coming Soon" già costruite alla geometria corrente
+  // (fresca): usata sia quando i font finiscono di caricarsi (possono essere state
+  // costruite prima, con misure sbagliate) sia al resize della finestra, visto che la
+  // card vera di Eratosthenes si ricentra dinamicamente a ogni render() mentre queste
+  // erano rimaste fisse ai pixel calcolati una tantum
+  function repositionComingSoonOverlays(){
+    cardGeometry = null;
+    const overlays = Object.values(comingSoonOverlays);
+    if (!overlays.length) return;
+    const geometry = computeCardGeometry(games[0], 1);
+    overlays.forEach(el => {
+      el.style.top = geometry.top + 'px';
+      el.style.left = geometry.left + 'px';
+      el.style.width = geometry.width + 'px';
+      el.style.height = geometry.height + 'px';
+      el._targetGeometry = geometry;
+    });
+  }
+
+  // card "Coming Soon": stessa identica dimensione/posizione di Eratosthenes (vedi
+  // computeCardGeometry), titolo con lo stesso font del titolo di Eratosthenes, e sotto
+  // una data più piccola per ciascuna (vedi comingSoonUnlockLabels)
+  function buildComingSoonCard(index){
+    const geometry = computeCardGeometry(games[0], 1);
+    const overlay = document.createElement('div');
+    overlay.className = 'coming-soon-card';
+    const dateHtml = comingSoonUnlockLabels[index - 1] ? `<p class="unlock-date">${comingSoonUnlockLabels[index - 1]}</p>` : '';
+    overlay.innerHTML = `<h2 class="game-title-centered">COMING SOON</h2>${dateHtml}`;
+    document.body.appendChild(overlay);
+    overlay._targetGeometry = geometry; // riletta da showComingSoonPage per l'animazione di comparsa
+    return overlay;
+  }
+
+  // mostra la card "Coming Soon" della pagina data, nascondendo le altre; la costruisce
+  // al primo passaggio, poi la riusa. isNavigation distingue un vero cambio pagina dal
+  // carosello (sequenza stretta-fade-pausa-allargamento, come Eratosthenes ma dimezzata
+  // e senza movimento) da un semplice re-render (resize, ecc: nessuna animazione)
+  function showComingSoonPage(index, isNavigation){
+    if (window.innerWidth <= 900) return; // su mobile la schermata "Coming Soon" è un'altra (vedi mobileGameSectionHtml)
+    Object.keys(comingSoonOverlays).forEach(key => {
+      if (Number(key) !== index) comingSoonOverlays[key].style.display = 'none';
+    });
+    if (!comingSoonOverlays[index]){
+      comingSoonOverlays[index] = buildComingSoonCard(index);
+    }
+    const overlay = comingSoonOverlays[index];
+    if (isNavigation || overlay.style.display !== 'flex'){
+      const g = overlay._targetGeometry;
+      playCardNavAnimation(overlay, g.top, g.left, g.width, g.height);
+    }
+  }
+
+  function handleEratoIntro(grid, g, number){
+    if (window.innerWidth <= 900) return;
+    if (grid.dataset.eratoIntroPlayed === 'true') return;
+    grid.dataset.eratoIntroPlayed = 'true';
+
+    let revealed = false;
+    let cardStarted = false;
+
+    // titolo, sottotitolo e pulsante suono: fade in di 0.5s appena i font sono
+    // pronti (mai visibili prima, nemmeno un fotogramma col font di riserva prima
+    // che Kalam sia pronto). La card è esclusa da questa dissolvenza: parte a parte,
+    // 0.5s dopo, così comincia esattamente quando questo fade in è appena finito
+    // titolo, sottotitolo, pulsante suono e pulsanti/pallini del carosello: fade in di
+    // 0.5s appena i font sono pronti (mai visibili prima, nemmeno un fotogramma col
+    // font di riserva o in una posizione ancora da calcolare). La card è esclusa da
+    // questa dissolvenza: parte a parte, 0.5s dopo, così comincia esattamente quando
+    // questo fade in è appena finito
+    function revealPageChrome(){
+      if (revealed) return;
+      revealed = true;
+      positionIndexSoundBtn(); // ricalcolo qui: ora i font sono DAVVERO pronti
+      const geometry = computeCardGeometry(g, number);
+      centerNavColumns(geometry.top, geometry.height); // stessa logica: calcolo PRIMA di mostrare, mai dopo
+      document.querySelectorAll('.title-row .mark, .subtitle, .nav-column').forEach(el => {
+        el.style.opacity = '1';
+      });
+      const soundBtn = document.getElementById('indexSoundBtn');
+      if (soundBtn) soundBtn.style.opacity = '1';
+    }
+
+    function playCardSequence(){
+      if (cardStarted) return; // il fallback dei 15s e la promise dei font potrebbero
+      cardStarted = true;      // scattare entrambi: la sequenza deve partire una sola volta
+      const geometry = computeCardGeometry(g, number);
+      playEratoIntroOverlay(geometry.top, geometry.left, geometry.width, geometry.height, g, number);
+    }
+
+    // aspetto che i font siano DAVVERO pronti prima di misurare qualunque cosa: il
+    // titolo (e tutto il resto) usa il font "Kalam", esterno — se non è ancora
+    // scaricato, il browser misura con un font di riserva più piccolo, dando
+    // un'altezza sbagliata. Siccome il tempo di scaricamento del font varia a ogni
+    // refresh, senza questa attesa il bug sembra comparire "a caso"
+    const fontsPromise = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    fontsPromise.then(() => {
+      revealPageChrome();
+      setTimeout(playCardSequence, 500);
+    });
+    // rete di sicurezza: se i font non risultassero mai pronti, si parte comunque
+    // dopo 15 secondi (stessa soglia già usata altrove nel file per lo stesso motivo)
+    setTimeout(() => {
+      revealPageChrome();
+      playCardSequence();
+    }, 15000);
+  }
+
+  // misura da zero l'altezza naturale del contenuto vero (titolo, Game X, pulsanti,
+  // anteprima, descrizione + classifica), indipendente da qualunque altra variabile
+  // condivisa nel resto del codice
+  function measureEratoContentHeight(g, number, totalWidth){
+    const halfWidth = totalWidth / 2;
+    const probe = document.createElement('div');
+    probe.style.position = 'absolute';
+    probe.style.visibility = 'hidden';
+    probe.style.pointerEvents = 'none';
+    probe.style.left = '-9999px';
+    probe.style.top = '0px';
+    probe.style.width = totalWidth + 'px';
+    probe.style.display = 'flex';
+    probe.style.flexDirection = 'row';
+    probe.innerHTML = `
+      <div class="erato-content-half" style="width:${halfWidth}px; flex-shrink:0; box-sizing:border-box; padding:0.855rem; display:flex; flex-direction:column; gap:0.475rem;">
+        ${eratoContentHtml(g)}
+      </div>
+      <div class="erato-leaderboard-half leaderboard-card" style="flex:1 1 auto; min-width:0; box-sizing:border-box; padding:0.855rem;">
+        ${eratoLbPreviewHtml(g)}
+      </div>`;
+    document.body.appendChild(probe);
+    const measuredHeight = probe.offsetHeight;
+    document.body.removeChild(probe);
+    return measuredHeight;
+  }
+
+  // card animata: unica card esistente per Eratosthenes, costruita direttamente in JS
+  // (il contenuto non vive più come markup statico da nessuna parte nella pagina).
+  // Compare al centro (comparsa 0.75s), poi scorre verso la posizione bersaglio mentre
+  // si allarga (1.5s) — durante tutta questa fase non è interagibile. L'anteprima della
+  // griglia (mini-sieve) parte 0.5s dopo che tutto ha finito
+  function loopMiniSievePreview(overlay){
+    const cells = Array.from(overlay.querySelectorAll('.mc.prime'));
+    if (!cells.length) return;
+    setInterval(() => {
+      // spegnimento immediato di tutti i numeri
+      cells.forEach(c => { c.style.animation = 'none'; });
+      // un secondo di buio, poi riparte la sequenza di accensione a scaglioni
+      setTimeout(() => {
+        cells.forEach((c, i) => {
+          void c.offsetWidth; // forzo il reflow prima di far ripartire l'animazione
+          c.style.animation = 'mc-light-up 1s ease forwards';
+          c.style.animationDelay = `${i * 750}ms`;
+        });
+      }, 1000);
+    }, 30000);
+  }
+
+  // misura e posiziona tutto ciò che dipende dalla larghezza FINALE della card
+  // (margine delle tabelle, riga divisoria, Game X): va chiamata solo DOPO che
+  // l'allargamento è completamente finito, altrimenti si misura la card ancora
+  // stretta e tutto risulta fuori posto
+  function finalizeEratoLayout(overlay){
+    overlay.dataset.eratoFinalized = 'true'; // da qui in poi, è sicuro calcolare margini basati sulla larghezza finale
+    const lbHalf = overlay.querySelector('.erato-leaderboard-half');
+
+    // il margine destro della classifica potrebbe essere già quello giusto (applicato
+    // in playEratoIntroOverlay mentre la card era ancora invisibile), MA se nel
+    // frattempo sono arrivati i dati veri dal Worker (refreshEratoLeaderboard) prima
+    // che l'allargamento finisse, quella funzione riscrive l'HTML della classifica e
+    // perde lo stile inline del margine, confidando che venisse rifatto qui — quindi
+    // va sempre riapplicato qui, non è mai sicuro assumere che sia già a posto
+    if (lbHalf) applyEratoLbMargin(overlay, lbHalf);
+
+    // riga divisoria: a metà esatta tra il bordo destro del pulsante "Play now"
+    // (ora unico, a piena larghezza) e il bordo sinistro delle tabelle della
+    // classifica — misurata dal vero. Stessa posizione riusata anche per "Game X"
+    // e la testolina di Eratostene qui sotto
+    const rightPlayBtn = overlay.querySelector('.cta-full-width');
+    const firstLbRow = overlay.querySelector('.lb-row');
+    let dividerX = null;
+    if (rightPlayBtn && firstLbRow){
+      const overlayRect = overlay.getBoundingClientRect();
+      const btnRight = rightPlayBtn.getBoundingClientRect().right;
+      const rowLeft = firstLbRow.getBoundingClientRect().left;
+      dividerX = (btnRight + rowLeft) / 2 - overlayRect.left;
+
+      let dividerLine = overlay.querySelector('.erato-mid-divider');
+      if (!dividerLine){
+        dividerLine = document.createElement('div');
+        dividerLine.className = 'erato-mid-divider';
+        dividerLine.innerHTML = `
+          <svg viewBox="0 0 10 356" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="eratoMidDividerFade" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(243,239,228,0)" />
+                <stop offset="18%" stop-color="rgba(243,239,228,0.12)" />
+                <stop offset="82%" stop-color="rgba(243,239,228,0.12)" />
+                <stop offset="100%" stop-color="rgba(243,239,228,0)" />
+              </linearGradient>
+            </defs>
+            <path d="M5,0 Q2,89 3.5,178 Q2,267 5,356 Q8,267 6.5,178 Q8,89 5,0 Z" fill="url(#eratoMidDividerFade)" />
+          </svg>`;
+        overlay.appendChild(dividerLine);
+      }
+      dividerLine.style.left = dividerX + 'px';
+
+      // Game X va alla stessa posizione orizzontale della riga, ma più in basso
+      // (non più a cavallo del bordo), abbastanza da leggersi tutto senza tagli
+      const gamexTag = overlay.querySelector('.erato-gamex-tag');
+      if (gamexTag){
+        gamexTag.style.left = dividerX + 'px';
+        gamexTag.style.top = '-2px';
+        // non cliccabile/hoverabile finché non è del tutto comparso: l'opacità da
+        // sola non blocca gli eventi del mouse, serve pointer-events esplicito
+        gamexTag.style.pointerEvents = 'none';
+        // ora che è nel posto giusto, lo faccio comparire gradualmente — mai visibile
+        // nella posizione sbagliata, nessun salto. Il reflow forzato (offsetWidth)
+        // prima di impostare transition+opacity è necessario: con un rAF singolo e
+        // basta, a volte il browser raggruppa tutto nello stesso ricalcolo di stile
+        // e la dissolvenza sparisce, comparendo di scatto invece che gradualmente
+        void gamexTag.offsetWidth;
+        gamexTag.style.transition = 'opacity 1s ease';
+        gamexTag.style.opacity = '1';
+        setTimeout(() => { gamexTag.style.pointerEvents = 'auto'; }, 1000);
+      }
+
+      // piccola immagine di Eratostene, dalla parte opposta di Game X: stessa X della
+      // riga, ma attaccata al bordo INFERIORE della card invece che a quello superiore
+      let faceImg = overlay.querySelector('.erato-face-img');
+      if (!faceImg){
+        faceImg = document.createElement('img');
+        faceImg.className = 'erato-face-img';
+        faceImg.src = 'eratostene_face.png';
+        faceImg.alt = '';
+        faceImg.style.opacity = '0';
+        overlay.appendChild(faceImg);
+        void faceImg.offsetWidth; // stesso reflow forzato di gamexTag, stesso motivo
+        faceImg.style.transition = 'opacity 1s ease';
+        faceImg.style.opacity = '1';
+      }
+      faceImg.style.left = dividerX + 'px';
+    }
+
+    // al passaggio del mouse su RULES, la classifica sparisce per un attimo lasciando
+    // spazio al testo delle regole (lo stesso che si legge aprendo il popup); togliendo
+    // il mouse, torna la classifica. Questo blocco va DOPO tutto il resto, così il
+    // contenuto catturato come "vero" è già nella sua forma finale corretta (margini,
+    // ecc.) — prima veniva catturato troppo presto, riportando indietro una versione
+    // senza quegli aggiustamenti quando si toglieva il mouse da RULES
+    const rulesBtn = overlay.querySelector('#eratoRulesBtn');
+    if (rulesBtn && lbHalf && !rulesBtn.dataset.hoverBound){
+      rulesBtn.dataset.hoverBound = 'true';
+      const rulesPreviewHtml = `
+        <div class="erato-rules-preview">
+          <h3>Rules</h3>
+          <p><strong>How to play:</strong> find the 5 hidden primes in the 5×5 grid, add up their values, enter the total. Correct answer = next level.</p>
+          <p><strong>Modes:</strong> each mode has its own rules on time limits and leaderboards — check them when choosing your mode.</p>
+          <p><strong>Fair play:</strong> out of respect for all participants, please don't cheat.</p>
+          <p>Happy prime hunting.</p>
+          <p class="device-note-old">Progress is saved per device — switching devices restarts from level 1.</p>
+        </div>`;
+      // stato esplicito, mai dedotto leggendo l'HTML attuale: leggere lbHalf.innerHTML
+      // per "indovinare" cosa c'è dentro era la causa del blocco — con hover ripetuti
+      // veloci, a volte veniva letto mentre RULES era già in vista, salvando quel
+      // testo come se fosse la classifica vera, corrompendo il ripristino per sempre
+      lbHalf._realLbHtml = lbHalf.innerHTML;
+      lbHalf._isShowingRules = false;
+      let swapTimer = null;
+      const fadeMs = 350;
+
+      rulesBtn.addEventListener('mouseenter', () => {
+        if (lbHalf._isShowingRules) return; // già in vista o in transizione: ignoro il re-trigger
+        lbHalf._isShowingRules = true;
+        clearTimeout(swapTimer);
+        lbHalf.style.transition = `opacity ${fadeMs}ms ease`;
+        lbHalf.style.opacity = '0';
+        swapTimer = setTimeout(() => {
+          lbHalf.innerHTML = rulesPreviewHtml;
+          // l'allineamento a destra (.erato-rules-preview è tra i selettori della
+          // regola CSS condivisa) arriva da solo dalla variabile --erato-lb-margin
+          void lbHalf.offsetWidth; // forzo il reflow prima di far ripartire la dissolvenza
+          lbHalf.style.opacity = '1';
+        }, fadeMs);
+      });
+      rulesBtn.addEventListener('mouseleave', () => {
+        if (!lbHalf._isShowingRules) return; // non era in vista: nulla da ripristinare
+        lbHalf._isShowingRules = false;
+        clearTimeout(swapTimer);
+        lbHalf.style.transition = `opacity ${fadeMs}ms ease`;
+        lbHalf.style.opacity = '0';
+        swapTimer = setTimeout(() => {
+          lbHalf.innerHTML = lbHalf._realLbHtml; // sempre il contenuto vero, mai una copia sporcata
+          // l'allineamento a destra arriva da solo dalla variabile --erato-lb-margin,
+          // non serve più riapplicarlo a mano riga per riga
+          void lbHalf.offsetWidth;
+          lbHalf.style.opacity = '1';
+        }, fadeMs);
+      });
+    }
+  }
+
+  // durata della comparsa iniziale (movimento verso l'alto), condivisa con qualunque
+  // altra card copi questa stessa animazione al caricamento della pagina
+  const CARD_INITIAL_FADE_MS = 1500;
+  // durata della dissolvenza al semplice cambio pagina dal carosello (nessun movimento)
+  const CARD_PAGE_CHANGE_FADE_MS = 1000;
+  // pausa ferma al centro e allargamento: condivisi tra la comparsa iniziale di
+  // Eratosthenes e la sequenza di cambio pagina dal carosello, stessa identica durata
+  const CARD_PAUSE_MS = 250;
+  const CARD_EXPAND_MS = 1250;
+
+  // sequenza di comparsa usata a ogni cambio pagina dal carosello (avanti, indietro,
+  // ritorno a Eratosthenes): identica nella struttura a playEratoIntroOverlay (stretta
+  // e centrata, poi fade in, pausa, poi allargamento fino alla dimensione finale) ma
+  // con la dissolvenza dimezzata (CARD_PAGE_CHANGE_FADE_MS invece di CARD_INITIAL_FADE_MS)
+  // e SENZA il movimento verticale di 30px, che appartiene solo alla comparsa iniziale
+  // dal caricamento pagina. Usata sia per le card "Coming Soon" sia per il ritorno alla
+  // card di Eratosthenes via freccette
+  function playCardNavAnimation(overlay, targetTop, targetLeft, targetWidth, targetHeight, onDone){
+    const narrowWidth = targetWidth / 2;
+    const viewportCenter = window.innerWidth / 2;
+    const centerLeft = viewportCenter - narrowWidth / 2;
+
+    overlay.style.transition = 'none';
+    overlay.style.display = 'flex';
+    overlay.style.pointerEvents = 'none';
+    overlay.style.top = targetTop + 'px';
+    overlay.style.left = centerLeft + 'px';
+    overlay.style.width = narrowWidth + 'px';
+    overlay.style.height = targetHeight + 'px';
+    overlay.style.opacity = '0';
+    void overlay.offsetWidth; // forzo il reflow prima di avviare la sequenza vera
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        overlay.style.transition = `opacity ${CARD_PAGE_CHANGE_FADE_MS}ms ease`;
+        overlay.style.opacity = '1';
+
+        setTimeout(() => {
+          setTimeout(() => {
+            overlay.style.transition = `left ${CARD_EXPAND_MS}ms ease, width ${CARD_EXPAND_MS}ms ease`;
+            overlay.style.left = targetLeft + 'px';
+            overlay.style.width = targetWidth + 'px';
+            setTimeout(() => {
+              overlay.style.pointerEvents = 'auto';
+              if (onDone) onDone();
+            }, CARD_EXPAND_MS);
+          }, CARD_PAUSE_MS);
+        }, CARD_PAGE_CHANGE_FADE_MS);
+      });
+    });
+  }
+
+  function playEratoIntroOverlay(targetTop, targetLeft, targetWidth, targetHeight, g, number){
+    const fadeInDuration = CARD_INITIAL_FADE_MS; // comparsa: un secondo e mezzo
+    const pauseDuration = CARD_PAUSE_MS;    // pausa ferma al centro: un quarto di secondo
+    const expandDuration = CARD_EXPAND_MS;  // allargamento: un secondo e un quarto
+
+    const narrowWidth = targetWidth / 2;
+    const viewportCenter = window.innerWidth / 2;
+    const centerLeft = viewportCenter - narrowWidth / 2;
+
+    const overlay = document.createElement('div');
+    overlay.innerHTML = `
+      <div class="erato-gamex-tag" id="eratoRulesBtn">RULES</div>
+      <div class="erato-content-half" style="width:${narrowWidth}px; flex-shrink:0; box-sizing:border-box; padding:0.855rem; display:flex; flex-direction:column; gap:0.475rem;">
+        ${eratoContentHtml(g)}
+      </div>
+      <div class="erato-leaderboard-half leaderboard-card" style="flex:1 1 auto; min-width:0; box-sizing:border-box; padding:0.855rem;">
+        ${eratoLbPreviewHtml(g)}
+      </div>`;
+    overlay.style.cssText = `
+      position: absolute;
+      top: ${targetTop}px;
+      left: ${centerLeft}px;
+      width: ${narrowWidth}px;
+      height: ${targetHeight}px;
+      box-sizing: border-box;
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+      background: var(--bg-panel);
+      border: 1px solid rgba(232,196,104,0.85);
+      border-radius: 6px;
+      box-shadow: 0 0 0 1px rgba(232,196,104,0.55), 0 0 0 2px rgba(232,196,104,0.25);
+      animation: erato-border-cycle 14s ease-in-out infinite;
+      z-index: 999;
+      opacity: 0;
+      transform: translateY(30px);
+      pointer-events: none;
+    `;
+    document.body.appendChild(overlay);
+    eratoOverlayEl = overlay;
+    loopMiniSievePreview(overlay);
+
+    // applico subito il margine destro della classifica, mentre la card è ancora
+    // invisibile (opacity:0): questa misura dipende solo dal padding interno, non
+    // dalla larghezza della card (che cambierà durante l'animazione), quindi è già
+    // corretta ora — applicarla qui invece che a fine animazione evita il salto
+    // visibile che si vedeva prima
+    applyEratoLbMargin(overlay, overlay.querySelector('.erato-leaderboard-half'));
+
+    // la card resta ferma qui, pronta e invisibile, finché la pagina non è DAVVERO
+    // finita di caricare (non solo il DOM: immagini, font, tutto) — solo allora parte
+    // la sequenza vera e propria, evitando qualunque interferenza dovuta al carico
+    // iniziale della pagina
+    function startSequence(){
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          overlay.style.transition = `opacity ${fadeInDuration}ms ease-in, transform ${fadeInDuration}ms ease-in`;
+          overlay.style.opacity = '1';
+          overlay.style.transform = 'translateY(0)';
+
+          // id dei timeout salvati man mano: se l'utente naviga via (overlay nascosto)
+          // prima che scadano, render() li cancella — altrimenti finalizeEratoLayout
+          // finirebbe per misurare un overlay display:none, scrivendo margini a zero
+          // in modo permanente (vedi FIX 2)
+          const t1 = setTimeout(() => {
+            // pausa ferma al centro, poi l'allargamento
+            const t2 = setTimeout(() => {
+              overlay.style.transition = `left ${expandDuration}ms ease, width ${expandDuration}ms ease`;
+              overlay.style.left = targetLeft + 'px';
+              overlay.style.width = targetWidth + 'px';
+              const t3 = setTimeout(() => {
+                // solo ORA la card è davvero alla larghezza finale: qui, e non prima,
+                // ha senso misurare dove sono davvero le tabelle della classifica
+                finalizeEratoLayout(overlay);
+                // l'animazione intera è finita: ora sì che si può interagire
+                overlay.style.pointerEvents = 'auto';
+              }, expandDuration);
+              eratoIntroTimeoutIds.push(t3);
+            }, pauseDuration);
+            eratoIntroTimeoutIds.push(t2);
+          }, fadeInDuration);
+          eratoIntroTimeoutIds.push(t1);
+        });
+      });
+    }
+
+    // aspetto solo i font (la vera dipendenza della pagina HTML in sé, quella che ci ha
+    // già causato problemi in passato) — non il caricamento totale della finestra, che
+    // includerebbe anche il contenuto degli iframe pubblicitari (gestito da Adsterra,
+    // fuori dal nostro controllo e spesso il più lento di tutti). Gli slot che ospitano
+    // i banner fanno comunque parte della pagina normale, solo il LORO contenuto esterno
+    // viene escluso dall'attesa
+    const fontsPromise = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    let started = false;
+    function startOnce(){
+      if (started) return;
+      started = true;
+      startSequence();
+    }
+    fontsPromise.then(startOnce);
+    // limite di sicurezza: se per qualche motivo i font non risultassero mai pronti,
+    // si parte comunque dopo 15 secondi, evitando un'attesa infinita
+    setTimeout(startOnce, 15000);
+  }
+
+  // ============================================================
+  // SEZIONE: POSIZIONAMENTO — centraggio card e pulsante audio
+  // ============================================================
+  function centerEratoRightEdge(){
+    if (window.innerWidth <= 900) return;
+    const gamesGrid = document.getElementById('gamesGrid');
+    if (!gamesGrid) return;
+
+    gamesGrid.style.transform = 'none'; // azzero prima di misurare, altrimenti la misura include lo spostamento precedente
+    void gamesGrid.offsetWidth;
+
+    const gridRect = gamesGrid.getBoundingClientRect();
+    const gridMidpoint = gridRect.left + gridRect.width / 2;
+    const viewportCenter = window.innerWidth / 2;
+    const shift = viewportCenter - gridMidpoint;
+
+    gamesGrid.style.transform = `translateX(${shift}px)`;
+  }
+  window.addEventListener('resize', centerEratoRightEdge);
+
+  function positionIndexSoundBtn(){
+    if (window.innerWidth <= 900) return;
+    const btn = document.getElementById('indexSoundBtn');
+    const title = document.querySelector('.mark');
+    const grid = document.getElementById('gamesGrid');
+    if (!btn || !title || !grid) return;
+
+    if (!indexSoundBtnMovedToBody){
+      document.body.appendChild(btn);
+      indexSoundBtnMovedToBody = true;
+    }
+
+    const titleRect = title.getBoundingClientRect();
+    // stessa logica usata per la card: colonna singola raddoppiata dal centro pagina,
+    // senza più bisogno di un elemento .game-card che ormai non esiste più nella griglia
+    const gridRect = grid.getBoundingClientRect();
+    const gridStyle = getComputedStyle(grid);
+    const gap = parseFloat(gridStyle.columnGap || gridStyle.gap) || 0;
+    const singleColWidth = (gridRect.width - gap) / 2;
+    const viewportCenter = window.innerWidth / 2;
+    const cardLeft = viewportCenter - singleColWidth;
+
+    // dimensione fissa a 55px (non più calcolata sull'altezza del titolo, su
+    // richiesta esplicita): resta identica a qualunque larghezza di schermo
+    const diameter = 55;
+    btn.style.width = diameter + 'px';
+    btn.style.height = diameter + 'px';
+    btn.style.fontSize = (diameter * 0.4267) + 'px';
+
+    const titleCenterY = titleRect.top + window.scrollY + titleRect.height / 2;
+    btn.style.left = cardLeft + 'px';
+    btn.style.top = (titleCenterY - diameter / 2) + 'px';
+  }
+  window.addEventListener('resize', positionIndexSoundBtn);
+
+  // ============================================================
+  // SEZIONE: CAROSELLO — navigazione tra i giochi (frecce, pallini)
+  // ============================================================
   function renderDots(topId, bottomId){
     const top = document.getElementById(topId);
     const bottom = document.getElementById(bottomId);
     top.innerHTML = '';
     bottom.innerHTML = '';
-    for (let i = 1; i <= 12; i++){
+    const totalDots = NAV_LIMIT_INDEX + 1;
+    const half = Math.ceil(totalDots / 2);
+    for (let i = 1; i <= totalDots; i++){
       const dot = document.createElement('div');
       dot.className = 'nav-dot' + (i === currentIndex + 1 ? ' active' : '');
-      if (i <= 6) top.appendChild(dot);
+      if (i <= half) top.appendChild(dot);
       else bottom.appendChild(dot);
     }
   }
@@ -1585,7 +2579,7 @@
     const next = currentIndex + direction;
     if (next < 0 || next > NAV_LIMIT_INDEX) return;
     currentIndex = next;
-    render();
+    render(true);
   }
 
   // tenere premuto (mouse o dito) continua a scorrere finché non si rilascia
@@ -1618,6 +2612,9 @@
   bindHold(document.getElementById('nextBtn'), 1);
 
   // su mobile le freccette diventano visivamente su/giù (stesso comportamento)
+  // ============================================================
+  // SEZIONE: MOBILE — blocco orizzontale (ruota il telefono)
+  // ============================================================
   function applyMobileRotation(){
     const isMobile = window.innerWidth <= 900;
     document.getElementById('prevBtn').classList.toggle('rotate', isMobile);
@@ -1632,14 +2629,120 @@
 
   measureEratoHeight();
   render();
-  setInterval(render, 30000);
 
-  fetchLeaderboard();
-  fetchPrimeRushLeaderboard();
+  // ogni simbolo si muove per conto suo, in linea retta, in una direzione casuale ampia;
+  // dopo 3 secondi di vita sfuma (in ordine sfalsato tra un simbolo e l'altro, non tutti insieme),
+  // e dopo mezzo secondo di pausa riappare altrove con un simbolo diverso
+  // ============================================================
+  // SEZIONE: COSTELLAZIONE — simboli matematici fluttuanti sullo sfondo
+  // ============================================================
+  function initConstellationLifecycle(){
+    const svg = document.querySelector('.math-constellation');
+    if (!svg) return;
+    const symbolPool = ['π', '√', 'Σ', '∞', '∫', 'Δ', 'θ', '×', '÷'];
+    const texts = Array.from(svg.querySelectorAll('text'));
+
+    // viewBox calcolato dalla dimensione vera del contenitore (non più un 1000×900
+    // fisso): con quel valore fisso, su schermi molto più larghi che alti come
+    // l'index, "xMidYMid slice" ritagliava una fetta verticale strettissima del
+    // viewBox, lasciando i simboli confinati in una banda orizzontale sottile
+    const wrapEl = svg.closest('.page-shell') || svg.parentElement;
+    const vbWidth = wrapEl.clientWidth || window.innerWidth;
+    const vbHeight = wrapEl.clientHeight || window.innerHeight;
+    svg.setAttribute('viewBox', `0 0 ${vbWidth} ${vbHeight}`);
+    const marginX = Math.min(30, vbWidth * 0.03);
+    const marginY = Math.min(30, vbHeight * 0.03);
+
+    // aggiunge un po' di imprecisione naturale a ogni durata, invece di tempi identici e meccanici
+    function jitter(baseMs, spreadMs){
+      return baseMs + (Math.random() * 2 - 1) * spreadMs;
+    }
+
+    function driftAway(el){
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 70 + Math.random() * 70; // tragitto ampio, in una sola direzione
+      const dx = Math.cos(angle) * distance;
+      const dy = Math.sin(angle) * distance;
+      // aggiungo la transizione del movimento a quella già presente (es. l'opacità in dissolvenza),
+      // invece di sovrascriverla del tutto: era proprio questo a causare gli scatti
+      const existingTransition = el.style.transition;
+      el.style.transition = existingTransition ? existingTransition + ', transform 7s linear' : 'transform 7s linear';
+      el.style.transform = `translate(${dx}px, ${dy}px)`;
+    }
+
+    // tiene conto di quanti simboli sono attualmente "invisibili" (in dissolvenza o in attesa),
+    // per garantire che restino sempre almeno 20 visibili sullo schermo
+    let invisibleCount = 0;
+    const minVisible = 20;
+
+    function respawn(el){
+      // se far morire questo simbolo facesse scendere i visibili sotto la soglia minima,
+      // rimando la sua morte di un po' e riprovo più tardi
+      if (texts.length - invisibleCount - 1 < minVisible){
+        setTimeout(() => { respawn(el); }, 400 + Math.random() * 400);
+        return;
+      }
+      invisibleCount++;
+      const fadeOutMs = jitter(1500, 700); // sparizione: ~1.5s, variazione ampia per rompere la sincronia
+      // a questo punto il simbolo è quasi certamente ancora a metà del suo percorso di 7s:
+      // aggiungo la dissolvenza alla transizione del movimento già in corso, invece di
+      // sovrascriverla — altrimenti il movimento si interrompe di colpo proprio qui
+      const existingTransition = el.style.transition;
+      const fadeOutRule = `opacity ${(fadeOutMs / 1000).toFixed(2)}s ease`;
+      el.style.transition = existingTransition ? existingTransition + ', ' + fadeOutRule : fadeOutRule;
+      el.style.opacity = '0';
+      setTimeout(() => {
+        const newX = marginX + Math.random() * (vbWidth - marginX * 2);
+        const newY = marginY + Math.random() * (vbHeight - marginY * 2);
+        el.setAttribute('x', newX.toFixed(0));
+        el.setAttribute('y', newY.toFixed(0));
+        el.textContent = symbolPool[Math.floor(Math.random() * symbolPool.length)];
+        el.style.transition = 'none';
+        el.style.transform = 'translate(0, 0)';
+        void el.getBoundingClientRect(); // forzo il reflow prima di far ripartire la dissolvenza
+        const gapMs = jitter(1000, 600); // attesa dopo la sparizione, prima di ricomparire: ~1s, variazione ampia
+        setTimeout(() => {
+          const fadeInMs = jitter(1500, 700); // comparsa: ~1.5s, variazione ampia per rompere la sincronia
+          el.style.transition = `opacity ${(fadeInMs / 1000).toFixed(2)}s ease`;
+          el.style.opacity = '';
+          invisibleCount--;
+          driftAway(el);
+          lifeLoop(el);
+        }, gapMs);
+      }, fadeOutMs);
+    }
+
+    function lifeLoop(el){
+      const lifeMs = jitter(3000, 1500); // vita: ~3s, variazione molto ampia per evitare che muoiano a blocchi
+      setTimeout(() => { respawn(el); }, lifeMs);
+    }
+
+    texts.forEach((el) => {
+      const initialStagger = 100; // solo un istante tecnico per il caricamento della pagina, il movimento parte subito per tutti
+      setTimeout(() => {
+        driftAway(el);
+        lifeLoop(el);
+      }, initialStagger);
+    });
+  }
+  initConstellationLifecycle();
+
+  // ritardate di proposito: l'apertura automatica dura ora 3s in tutto (0.75s+0.25s+1.25s
+  // erano i tempi vecchi, poi allungati) — questo valore va SEMPRE tenuto più alto della
+  // somma di quei 3 tempi, altrimenti i dati arrivano a metà dell'allargamento e la
+  // classifica viene ricalcolata con margini sbagliati (misurati su una larghezza ancora
+  // "a metà strada", non quella finale)
+  setTimeout(() => {
+    fetchLeaderboard();
+    fetchPrimeRushLeaderboard();
+  }, 3500);
   setInterval(fetchLeaderboard, 24 * 60 * 60 * 1000); // refresh una volta al giorno
   setInterval(fetchPrimeRushLeaderboard, 24 * 60 * 60 * 1000);
 
   // --- popup del regolamento ---
+  // ============================================================
+  // SEZIONE: POPUP — regolamento e scelta modalità di gioco
+  // ============================================================
   const rulesModal = document.getElementById('rulesModal');
   function openRulesModal(){ playSound('tap'); rulesModal.classList.add('visible'); }
   function closeRulesModal(){ playSound('tap'); rulesModal.classList.remove('visible'); }
@@ -1651,10 +2754,10 @@
   // --- popup di scelta modalità (The Sieve / Prime Rush / Infinite Primes) ---
   const modeModal = document.getElementById('modeModal');
   const modeOptionsEl = document.getElementById('modeOptions');
-  function openModeModal(gameIndex){
+  function openModeModal(gameIndex, forceUnlockAll){
     playSound('tap');
     const g = games[gameIndex];
-    const sieveFinished = localStorage.getItem('erato_basic_finished_once') === 'true';
+    const sieveFinished = forceUnlockAll || localStorage.getItem('erato_basic_finished_once') === 'true';
     modeOptionsEl.innerHTML = g.modes.map(m => {
       const isLocked = m.requiresSieveFinish && !sieveFinished;
       const href = resumeHref(m.hrefKey, m.file);
@@ -1691,11 +2794,19 @@
   if (document.fonts && document.fonts.ready){
     document.fonts.ready.then(() => {
       cachedEratoHeight = null;
+      measureEratoHeight();
+      // eventuali card "Coming Soon" già costruite prima che i font fossero pronti
+      // (es. navigazione molto rapida al caricamento) vanno riallineate ora che la
+      // misura è finalmente corretta (vedi computeCardGeometry/FIX 1)
+      repositionComingSoonOverlays();
       render();
     });
   }
 
   // --- scorrimento mobile a scatti veri: nessun movimento durante il trascinamento, scatta solo a gesto concluso ---
+  // ============================================================
+  // SEZIONE: MOBILE — scorrimento a schermate separate (snap scroll)
+  // ============================================================
   let mobileSnapIndex = 0;
   const snapTrack = document.getElementById('snapTrack');
   const snapScrollEl = document.getElementById('snapScroll');
@@ -1704,6 +2815,11 @@
     mobileSnapIndex = Math.max(0, Math.min(2, index));
     if (snapTrack) snapTrack.style.transform = `translateY(-${mobileSnapIndex * (100/3)}%)`;
   }
+  // stessa difesa di cui sopra, applicata qui allo scorrimento a scatti vero e proprio:
+  // forzo sempre la schermata Intro all'apertura, anche se il browser pensasse di
+  // dover ripristinare uno stato diverso da una visita precedente
+  goToSnap(0);
+  window.addEventListener('pageshow', () => { goToSnap(0); });
 
   if (snapScrollEl){
     let touchStartY = null;
@@ -1731,48 +2847,6 @@
 
 <script>window.MATHEMORY_FORCE_MUTED_ON_LOAD = true;</script>
 <script src="mathemory-audio.js"></script>
-
-<script>
-  // --- pubblicità: ogni annuncio isolato nel proprio iframe, con il proprio atOptions privato.
-  // Il formato Adsterra "highperformanceformat" usa una variabile globale condivisa (atOptions):
-  // con più annunci sulla stessa pagina si sovrascrivono a vicenda se non isolati così.
-  // Il codice del dispositivo "sbagliato" non viene MAI creato nella pagina — evita impression
-  // non valide che romperebbero il rapporto con Adsterra.
-  (function(){
-    const isMobileDevice = window.innerWidth <= 900;
-    const AD_SLOTS_DESKTOP = [
-      { elementId: 'adSlotDesktopLeft',      key: 'a6525e43bef9221ab88fe82913548d2e', width: 160, height: 600 },
-      { elementId: 'adSlotDesktopTopRect',   key: '50f98522da8b5e97edc7f610cc39417c', width: 300, height: 250 },
-      { elementId: 'adSlotDesktopSideSmall', key: 'e9e96fb4584ea554b462b7eccbf26cba', width: 160, height: 300 },
-    ];
-    const AD_SLOTS_MOBILE = [
-      { elementId: 'adSlotMobileTop',    key: 'a2a9c900934d95ac8d859267d025b589', width: 320, height: 50 },
-      { elementId: 'adSlotMobileBottom', key: 'fd6daf0ccf42f29bcea4f242a1daa43f', width: 320, height: 50 },
-    ];
-
-    function injectAdIframe(elementId, key, width, height){
-      if (!key) return; // nessun codice ancora inserito per questo slot: resta il placeholder
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      el.innerHTML = '';
-      const iframe = document.createElement('iframe');
-      iframe.style.width = width + 'px';
-      iframe.style.height = height + 'px';
-      iframe.style.border = 'none';
-      iframe.style.display = 'block';
-      iframe.scrolling = 'no';
-      iframe.srcdoc =
-        '<!DOCTYPE html><html><head><style>body{margin:0;padding:0;overflow:hidden;}</style></head><body>' +
-        '<script>atOptions={"key":"' + key + '","format":"iframe","height":' + height + ',"width":' + width + ',"params":{}};<\/script>' +
-        '<script src="https://www.highperformanceformat.com/' + key + '/invoke.js"><\/script>' +
-        '</body></html>';
-      el.appendChild(iframe);
-    }
-
-    const slots = isMobileDevice ? AD_SLOTS_MOBILE : AD_SLOTS_DESKTOP;
-    slots.forEach(slot => injectAdIframe(slot.elementId, slot.key, slot.width, slot.height));
-  })();
-</script>
 
 </body>
 </html>

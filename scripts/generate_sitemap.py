@@ -20,8 +20,13 @@ BASE_URL = "https://sakr3m.github.io/Mathemory"
 def find_html_pages(root_dir):
     pages = []
     for name in sorted(os.listdir(root_dir)):
-        if name.endswith(".html") and os.path.isfile(os.path.join(root_dir, name)):
-            pages.append(name)
+        if not name.endswith(".html") or not os.path.isfile(os.path.join(root_dir, name)):
+            continue
+        # file di verifica di Google Search Console (es. googleXXXXXXXX.html):
+        # non sono pagine vere del sito, non vanno nella sitemap
+        if name.startswith("google") and name != "index.html":
+            continue
+        pages.append(name)
     # index.html sempre per primo, se presente
     if "index.html" in pages:
         pages.remove("index.html")

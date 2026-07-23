@@ -6,7 +6,7 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://sakr3m.github.io/Mathemory/eratostene_thesieve.html</loc>
+    <loc>https://sakr3m.github.io/Mathemory/eratostene_infiniteprimes.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -16,7 +16,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sakr3m.github.io/Mathemory/eratostene_infiniteprimes.html</loc>
+    <loc>https://sakr3m.github.io/Mathemory/eratostene_thesieve.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -7,6 +7,11 @@ on:
   push:
     branches: [main]
 
+# di default una GitHub Action ha solo il permesso di lettura sulla repo:
+# senza questa dichiarazione esplicita, il passo "git push" più sotto fallisce
+permissions:
+  contents: write
+
 jobs:
   update-sitemap:
     runs-on: ubuntu-latest
